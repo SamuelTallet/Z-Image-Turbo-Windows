@@ -194,19 +194,27 @@ def parse_resolution(resolution):
     return 1024, 1024
 
 
-def load_model(model_name: str):
+def load_model(model: str, backup_model: str):
     """Load and configure the Z-Image pipeline.
 
     Args:
-        model_name: Hugging Face (HF) model name.
+        model: Hugging Face (HF) model name.
+        backup_model: HF backup model name.
     """
     global pipe
     global optimized
 
-    pipe = ZImagePipeline.from_pretrained(
-        model_name,
-        torch_dtype=bfloat16,
-    )
+    try:
+        pipe = ZImagePipeline.from_pretrained(
+            model,
+            torch_dtype=bfloat16,
+        )
+    except Exception:
+        logging.warning(f"Can't load {model}, falling back to {backup_model}.")
+        pipe = ZImagePipeline.from_pretrained(
+            backup_model,
+            torch_dtype=bfloat16,
+        )
 
     # Enable INT8 MatMul for AMD, Intel ARC and Nvidia GPUs:
     if triton_is_available and (cuda.is_available() or xpu.is_available()):
@@ -216,7 +224,11 @@ def load_model(model_name: str):
         pipe.text_encoder = apply_sdnq_options_to_model(
             pipe.text_encoder, use_quantized_matmul=True
         )
-        optimized = True
+        try:
+            pipe.transformer.set_attention_backend("sage")
+            optimized = True
+        except Exception as e:
+            logging.warning(f"SageAttention is not available: {e}")
 
     pipe.enable_model_cpu_offload()
 
@@ -312,11 +324,7 @@ if __name__ == "__main__":
     parser.add_argument("--locale", type=str, required=False, default="en-US")
     args, _ = parser.parse_known_args()
 
-    try:
-        load_model(args.model)
-    except Exception:
-        logging.warning(f"Can't load {args.model}, falling back to backup model.")
-        load_model(args.backup_model)
+    load_model(args.model, args.backup_model)
 
     if args.locale != "en-US":
         load_translation(args.locale)
