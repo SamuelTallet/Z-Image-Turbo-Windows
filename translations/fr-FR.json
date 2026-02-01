@@ -18,5 +18,7 @@
     "Seed Used": "Graine utilisée",
     "Source model": "Modèle source",
     "Image generation may be slow because diffusion pipeline is not optimized.": "La génération d'images risque d'être lente car le pipeline de diffusion n'est pas optimisé.",
-    "Try upgrading your graphics card drivers, then reboot your PC and restart": "Essayez de mettre à jour les pilotes de votre carte graphique, puis redémarrez votre PC et relancez"
+    "Try upgrading your graphics card drivers, then reboot your PC and restart": "Essayez de mettre à jour les pilotes de votre carte graphique, puis redémarrez votre PC et relancez",
+    "Cleared Triton cache as it may be corrupted.": "Le cache de Triton a été vidé car il était peut-être corrompu.",
+    "Regenerating same image...": "Re-génération de la même image..."
 }
