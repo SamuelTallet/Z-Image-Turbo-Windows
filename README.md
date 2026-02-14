@@ -1,4 +1,4 @@
-# Z-Image Turbo for Windows
+# ZPix
 
 <img src="https://raw.githubusercontent.com/SamuelTallet/Z-Image-Turbo-Windows/refs/heads/main/docs/screens/Z-Image-Turbo-v1.0.0.webp">
 
@@ -22,17 +22,17 @@ No watermarks, no limits. Images are computed on your computer.
 
 ## Gallery
 
-All images below were generated using Z-Image Turbo for Windows:
+All images below were generated using ZPix:
 
-<img src="https://raw.githubusercontent.com/SamuelTallet/Z-Image-Turbo-Windows/refs/heads/main/docs/gallery/image0.webp">
-<img src="https://raw.githubusercontent.com/SamuelTallet/Z-Image-Turbo-Windows/refs/heads/main/docs/gallery/image2.webp">
-<img src="https://raw.githubusercontent.com/SamuelTallet/Z-Image-Turbo-Windows/refs/heads/main/docs/gallery/image7.webp">
+<img src="https://raw.githubusercontent.com/SamuelTallet/ZPix/refs/heads/main/docs/gallery/image0.webp">
+<img src="https://raw.githubusercontent.com/SamuelTallet/ZPix/refs/heads/main/docs/gallery/image2.webp">
+<img src="https://raw.githubusercontent.com/SamuelTallet/ZPix/refs/heads/main/docs/gallery/image7.webp">
 
-See more examples [here](https://github.com/SamuelTallet/Z-Image-Turbo-Windows/tree/main/docs/gallery).
+See more examples [here](https://github.com/SamuelTallet/ZPix/tree/main/docs/gallery).
 
 ## Frequently asked questions
 
-Please get to [FAQ page](https://github.com/SamuelTallet/Z-Image-Turbo-Windows/blob/main/docs/FAQ.md).
+Please get to [FAQ page](https://github.com/SamuelTallet/ZPix/blob/main/docs/FAQ.md).
 
 ## Credits
 

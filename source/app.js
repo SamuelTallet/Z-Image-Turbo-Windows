@@ -1,5 +1,5 @@
 /*
- * Z-Image Turbo Gradio app custom JavaScript.
+ * ZPix Gradio app custom JavaScript.
  */
 
 // Delegate events for some elements.

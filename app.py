@@ -1,4 +1,4 @@
-"""Z-Image Turbo Gradio app."""
+"""ZPix Gradio app."""
 # Based on https://huggingface.co/spaces/Tongyi-MAI/Z-Image-Turbo
 
 import logging

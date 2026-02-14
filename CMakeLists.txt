@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 4.1)
 
-file(READ "metadata/SAFE_NAME" PROJECT_NAME)
+file(READ "metadata/NAME" PROJECT_NAME)
 file(READ "metadata/VERSION" PROJECT_VERSION)
 file(READ "metadata/DESCRIPTION" DESCRIPTION)
 

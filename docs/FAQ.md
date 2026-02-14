@@ -1,4 +1,4 @@
-# Z-Image Turbo for Windows FAQ
+# ZPix FAQ
 
 ## Can I use this application for commercial purposes?
 
