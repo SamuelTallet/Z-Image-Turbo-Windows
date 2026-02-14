@@ -5,6 +5,7 @@ build
 cache
 temp
 vcpkg_installed
+.tou_accepted
 *.dll
 *.exe
 DEBUG*

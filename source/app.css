@@ -2,6 +2,34 @@
  * ZPix Gradio app custom styles.
  */
 
+.blurred {
+    filter: blur(4px);
+    pointer-events: none;
+    user-select: none;
+}
+
+#tou-row {
+    position: fixed;
+    inset: 0;
+    place-content: center;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 1000;
+}
+
+/*
+ * Gradio CSS classes and variables are subject to
+ * change in future versions; but since we pinned
+ * a Gradio version, this shouldn't be an issue...
+ */
+
+#tou-card {
+    max-width: 360px;
+    padding: 1rem;
+    background: var(--block-background-fill);
+    border-radius: 5px;
+    text-align: center;
+}
+
 .sidebar {
     max-width: 48px;
 }
@@ -12,12 +40,6 @@
     height: 34px;
     width: 34px;
 }
-
-/*
- * Gradio CSS classes are subject to change
- * in future versions; but since we pinned
- * a version, this shouldn't be an issue...
- */
 
 .sidebar .hide-container,
 .sidebar .form {

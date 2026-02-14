@@ -17,6 +17,7 @@ from sdnq.common import use_torch_compile as triton_is_available
 from sdnq.loader import apply_sdnq_options_to_model
 from torch import bfloat16, cuda, manual_seed, xpu
 
+from source.py.disclaimer import TERMS_OF_USE, TermsOfUse
 from source.py.lora_model import LoraModel
 
 logging.basicConfig(format="%(levelname)s: %(message)s")
@@ -473,6 +474,8 @@ if __name__ == "__main__":
     if args.locale != "en-US":
         load_translation(args.locale)
 
+    tou = TermsOfUse(app_dir / ".tou_accepted")
+
     (
         resolutions_by_aspect,
         default_resolution_choices,
@@ -483,7 +486,7 @@ if __name__ == "__main__":
     with gr.Blocks(
         analytics_enabled=False,
     ) as app:
-        with gr.Row():
+        with gr.Row(elem_classes=[] if tou.accepted() else ["blurred"]) as ui_row:
             with gr.Column(min_width=48, elem_classes=["sidebar"]):
                 gr.Button(
                     "",
@@ -685,6 +688,20 @@ if __name__ == "__main__":
                     )
                 """
             )
+
+        with gr.Row(
+            visible=not tou.accepted(),
+            elem_id="tou-row",
+        ) as tou_row:
+            with gr.Column(elem_id="tou-card"):
+                gr.Markdown(f"### {t('Terms of Use')}")
+                gr.Markdown(t(TERMS_OF_USE))
+                agree_tou_btn = gr.Button(t("I agree"), variant="primary")
+
+                agree_tou_btn.click(tou.accept).then(
+                    lambda: (gr.update(visible=False), gr.update(elem_classes=[])),
+                    outputs=[tou_row, ui_row],
+                )
 
         def update_resolution_choices(_aspect_ratio):
             resolution_choices = resolutions_by_aspect.get(

@@ -55,6 +55,10 @@ Thanks to M1000 and TGS for beta testing this program.
 
 This program is free software: you can redistribute it and/or modify it under the terms of the [GNU General Public License](https://www.gnu.org/licenses/gpl.html) version 3 or later.
 
+## Terms of Use
+
+You engage to use this program legally and ethically.
+
 ## Developer
 
 Samuel Tallet
