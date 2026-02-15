@@ -1,14 +1,14 @@
 # ZPix
 
-<img src="https://raw.githubusercontent.com/SamuelTallet/Z-Image-Turbo-Windows/refs/heads/main/docs/screens/Z-Image-Turbo-v1.0.0.webp">
+<img src="https://raw.githubusercontent.com/SamuelTallet/ZPix/refs/heads/main/docs/screens/ZPix-v1.0.4.webp">
 
 Generate images easily, for free, using solely the power of your GPU.<br>
-No watermarks, no limits. Images are computed on your computer.
+Apply LoRAs on the fly. Trigger words are automatically inserted...
 
 ## Quick start
 
-1. Download and extract [Z-Image-Turbo-v1.0.3.zip](https://github.com/SamuelTallet/Z-Image-Turbo-Windows/releases/download/v1.0.3/Z-Image-Turbo-v1.0.3.zip)
-2. Run `Z-Image-Turbo.exe`
+1. Download and extract [ZPix-v1.0.4.zip](https://github.com/SamuelTallet/ZPix/releases/download/v1.0.4/ZPix-v1.0.4.zip)
+2. Run `ZPix.exe`
     - If SmartScreen pops, click on "More info", "Run anyway"
     - If a DLL is missing, install [Visual C++ Redist](https://aka.ms/vc14/vc_redist.x64.exe) and re-run
 3. Write a prompt
