@@ -10,7 +10,7 @@ class LoraModel:
     """LoRA model."""
 
     def __init__(self, path: str | Path):
-        """Opens a LoRA model stored in safe tensors.
+        """Open a LoRA model stored in safe tensors.
 
         Args:
             path: Path to the LoRA .safetensors file.
@@ -121,7 +121,7 @@ class LoraModel:
         return tag
 
     def to_bf16(self) -> dict:
-        """Converts all LoRA tensors to `bfloat16` if needed.
+        """Convert all LoRA tensors to `bfloat16` if needed.
 
         Returns:
             A state dict with all tensors stored as `bfloat16`.

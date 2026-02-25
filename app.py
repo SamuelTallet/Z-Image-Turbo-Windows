@@ -18,6 +18,12 @@ from sdnq.loader import apply_sdnq_options_to_model
 from torch import bfloat16, cuda, manual_seed, xpu
 
 from source.py.disclaimer import TERMS_OF_USE, TermsOfUse
+from source.py.gen_history import (
+    add_prompt_to_history,
+    get_prompts_history,
+    on_prompts_history_row_select,
+)
+from source.py.generation import Generation
 from source.py.lora_model import LoraModel
 
 logging.basicConfig(format="%(levelname)s: %(message)s")
@@ -30,9 +36,18 @@ environ["TRITON_CACHE_DIR"] = str(Path.home() / ".triton")
 app_dir = Path(__file__).parent
 """App directory."""
 
-# We store temp files created by Gradio in app directory
-# to ease visualization of disk space used by this app.
+# We store temp files created by this app in a local directory
+# so we can remove them later without impacting other Gradio apps.
 environ["GRADIO_TEMP_DIR"] = str(app_dir / "temp" / "GradioApp")
+
+assets_dir = app_dir / "assets"
+"""Assets directory."""
+
+# Let's serve assets directly.
+gr.set_static_paths(paths=[assets_dir])
+
+output_dir = Path.home() / "Pictures" / "ZPix"
+"""Home of generated images."""
 
 translation: dict[str, str] = {}
 """Translation."""
@@ -452,11 +467,21 @@ def generate(
         gr.Info(t("Regenerating same image..."), duration=8)
         image = generate_image(**generation_args)
 
+    generation = Generation(
+        model="Z-Image Turbo",  # TODO: Make this dynamic.
+        image=image,
+        prompt=prompt,
+        resolution=resolution,
+        seed=new_seed,
+        steps=int(steps),
+    )
+    image_file, _prompt_file, _settings_file = generation.save(output_dir)
+
     if gallery_images is None:
         gallery_images = []
 
     # Prompt is added as image caption.
-    gallery_images.append((image, prompt))
+    gallery_images.append((image_file, prompt))
 
     return gallery_images, len(gallery_images) - 1, str(new_seed), int(new_seed)
 
@@ -490,7 +515,7 @@ if __name__ == "__main__":
             with gr.Column(min_width=48, elem_classes=["sidebar"]):
                 gr.Button(
                     "",
-                    icon=app_dir / "assets" / "noto-emoji" / "emoji_u26a1.svg",
+                    icon=assets_dir / "noto-emoji" / "emoji_u26a1.svg",
                     link=get_metadata("HOME_URL"),
                     link_target="_blank",  # Opens default browser. See app.js
                     elem_id="home-btn",
@@ -503,7 +528,7 @@ if __name__ == "__main__":
                 )
                 gr.Button(
                     "",
-                    icon=app_dir / "assets" / "lora_grad.svg",
+                    icon=assets_dir / "lora_grad.svg",
                     elem_id="swap-lora-btn",
                 )
                 gr.HTML(
@@ -518,7 +543,7 @@ if __name__ == "__main__":
                 )
                 gr.Button(
                     "",
-                    icon=app_dir / "assets" / "kerismaker" / "tech_13631866.png",
+                    icon=assets_dir / "kerismaker" / "tech_13631866.png",
                     link=f"{get_metadata('HOME_URL')}/blob/main/docs/FAQ.md",
                     link_target="_blank",
                     elem_id="faq-btn",
@@ -531,7 +556,7 @@ if __name__ == "__main__":
                 )
                 gr.Button(
                     "",
-                    icon=app_dir / "assets" / "kofi_symbol.svg",
+                    icon=assets_dir / "kofi_symbol.svg",
                     link=get_metadata("DONATE_URL"),
                     link_target="_blank",
                     elem_id="donate-btn",
@@ -651,7 +676,37 @@ if __name__ == "__main__":
                     outputs=[seed_random_row, steps_row],
                 )
 
+                prompts_history = get_prompts_history(
+                    output_dir,
+                    max_prompts=100,
+                )
+                prompts_history_frame = gr.DataFrame(
+                    visible=bool(prompts_history),
+                    label=t("Previous Prompts"),
+                    value=prompts_history,
+                    type="array",
+                    interactive=False,
+                    max_height=200,
+                    show_search="search",
+                    buttons=None,
+                    elem_id="prompts-history",
+                )
+                prompts_history_frame.select(
+                    on_prompts_history_row_select,
+                    outputs=prompt,
+                    show_progress="hidden",
+                )
+                gr.HTML(
+                    js_on_load=f"""
+                        let input = document.querySelector("#prompts-history .search-input")
+                        input.placeholder = "{t("Search...")}"
+                        input.title = "{t("among last 100 prompts")}"
+                        input.spellcheck = false
+                    """
+                )
+
                 gr.Examples(
+                    visible=not prompts_history,  # Onboarding-like.
                     examples=get_example_prompts(),
                     inputs=prompt,
                     label=t("Example Prompts"),
@@ -665,6 +720,7 @@ if __name__ == "__main__":
                     height=600,
                     object_fit="contain",
                     format="png",
+                    type="filepath",
                     buttons=["download", "fullscreen"],
                     interactive=False,
                 )
@@ -712,15 +768,20 @@ if __name__ == "__main__":
         aspect_ratio.change(
             update_resolution_choices, inputs=aspect_ratio, outputs=resolution
         )
+
         generate_btn.click(
             generate,
             inputs=[prompt, resolution, seed, steps, random_seed, gallery_images],
             outputs=[gallery_images, last_image_index, used_seed, seed],
         ).then(
             # Select generated image in gallery:
-            lambda imgs, idx: gr.Gallery(value=imgs, selected_index=idx),
-            inputs=[gallery_images, last_image_index],
+            lambda idx: gr.update(selected_index=idx),
+            inputs=last_image_index,
             outputs=gallery_images,
+        ).then(
+            add_prompt_to_history,
+            inputs=[prompt, prompts_history_frame],
+            outputs=[prompts_history_frame],
         )
 
         app.load(on_app_load)
@@ -731,4 +792,5 @@ if __name__ == "__main__":
         theme=get_theme(),
         css_paths=[app_dir / "source" / "app.css"],
         js=(app_dir / "source" / "app.js").read_text(),
+        allowed_paths=[output_dir],
     )
