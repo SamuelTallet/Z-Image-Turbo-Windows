@@ -773,6 +773,7 @@ if __name__ == "__main__":
             generate,
             inputs=[prompt, resolution, seed, steps, random_seed, gallery_images],
             outputs=[gallery_images, last_image_index, used_seed, seed],
+            show_progress_on=gallery_images,
         ).then(
             # Select generated image in gallery:
             lambda idx: gr.update(selected_index=idx),
