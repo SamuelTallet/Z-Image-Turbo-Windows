@@ -416,22 +416,22 @@ def generate(
     prompt,
     resolution="1024x1024",
     seed=42,
-    steps=8,
     random_seed=True,
+    steps=8,
     gallery_images=None,
 ):
-    """Gradio callback to generate an image and update the gallery.
+    """Generate an image and possibly a seed, and update gallery.
 
     Args:
         prompt: Text prompt for image generation.
         resolution: Resolution string (e.g. "1024x1024").
         seed: Seed value for reproducibility.
+        random_seed: Ignore seed argument and generate a seed?
         steps: Number of inference (denoising) steps.
-        random_seed: If True, generate a random seed ignoring the seed parameter.
         gallery_images: Existing gallery images to append to.
 
     Returns:
-        Tuple of (updated gallery, last image index, seed as str, seed as int).
+        Tuple of (updated gallery, last image index, used seed).
 
     Raises:
         gr.Error: If the pipeline is not loaded or busy.
@@ -446,15 +446,15 @@ def generate(
         )
 
     if random_seed:
-        new_seed = randint(1, 1000000)
+        used_seed = randint(1, 1000000)
     else:
-        new_seed = int(seed) if seed != -1 else randint(1, 1000000)
+        used_seed = int(seed) if seed != -1 else randint(1, 1000000)
 
     generation_args = {
         "pipe": pipe,
         "prompt": prompt,
         "resolution": resolution,
-        "seed": new_seed,
+        "seed": used_seed,
         "num_inference_steps": int(steps + 1),
     }
     try:
@@ -472,7 +472,7 @@ def generate(
         image=image,
         prompt=prompt,
         resolution=resolution,
-        seed=new_seed,
+        seed=used_seed,
         steps=int(steps),
     )
     image_file, _prompt_file, _settings_file = generation.save(output_dir)
@@ -483,7 +483,7 @@ def generate(
     # Prompt is added as image caption.
     gallery_images.append((image_file, prompt))
 
-    return gallery_images, len(gallery_images) - 1, str(new_seed), int(new_seed)
+    return gallery_images, len(gallery_images) - 1, used_seed
 
 
 if __name__ == "__main__":
@@ -725,9 +725,6 @@ if __name__ == "__main__":
                     interactive=False,
                 )
                 last_image_index = gr.State(value=None)
-                used_seed = gr.Textbox(
-                    label=t("Seed Used"), interactive=False, visible=False
-                )
 
         with gr.Row():
             # Add source model link to footer, after Gradio credit.
@@ -771,8 +768,8 @@ if __name__ == "__main__":
 
         generate_btn.click(
             generate,
-            inputs=[prompt, resolution, seed, steps, random_seed, gallery_images],
-            outputs=[gallery_images, last_image_index, used_seed, seed],
+            inputs=[prompt, resolution, seed, random_seed, steps, gallery_images],
+            outputs=[gallery_images, last_image_index, seed],
             show_progress_on=gallery_images,
         ).then(
             # Select generated image in gallery:
