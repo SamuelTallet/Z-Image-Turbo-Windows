@@ -509,6 +509,7 @@ if __name__ == "__main__":
     ) = get_aspects_and_resolutions()
 
     with gr.Blocks(
+        fill_width=True,
         analytics_enabled=False,
     ) as app:
         with gr.Row(elem_classes=[] if tou.accepted() else ["blurred"]) as ui_row:
