@@ -8,6 +8,11 @@
     user-select: none;
 }
 
+.align-right {
+    width: fit-content;
+    margin-left: auto;
+}
+
 #tou-row {
     position: fixed;
     inset: 0;

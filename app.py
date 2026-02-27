@@ -12,6 +12,7 @@ from shutil import rmtree
 
 import gradio as gr
 from diffusers import ZImagePipeline
+from platformdirs import user_pictures_path
 from sdnq import SDNQConfig  # noqa: F401
 from sdnq.common import use_torch_compile as triton_is_available
 from sdnq.loader import apply_sdnq_options_to_model
@@ -25,6 +26,7 @@ from source.py.gen_history import (
 )
 from source.py.generation import Generation
 from source.py.lora_model import LoraModel
+from source.py.os_abstract import open_with_default_app
 
 logging.basicConfig(format="%(levelname)s: %(message)s")
 
@@ -46,8 +48,14 @@ assets_dir = app_dir / "assets"
 # Let's serve assets directly.
 gr.set_static_paths(paths=[assets_dir])
 
-output_dir = Path.home() / "Pictures" / "ZPix"
-"""Home of generated images."""
+output_dir: Path
+"""The folder where ZPix saves generated images, prompts, etc."""
+
+try:
+    output_dir = user_pictures_path() / "ZPix"
+except Exception:
+    logging.warning("Can't get user pictures path, using default.")
+    output_dir = Path.home() / "Pictures" / "ZPix"
 
 translation: dict[str, str] = {}
 """Translation."""
@@ -746,10 +754,22 @@ if __name__ == "__main__":
                     object_fit="contain",
                     format="png",
                     type="filepath",
-                    buttons=["download", "fullscreen"],
+                    buttons=["fullscreen"],
                     interactive=False,
                 )
                 last_image_index = gr.State(value=None)
+
+                open_output_folder_btn = gr.Button(
+                    t("Open Output Folder"),
+                    variant="primary",
+                    elem_classes=["align-right"],
+                )
+
+                def create_open_output_dir():
+                    output_dir.mkdir(parents=True, exist_ok=True)
+                    open_with_default_app(output_dir)
+
+                open_output_folder_btn.click(create_open_output_dir)
 
         with gr.Row():
             # Add source model link to footer, after Gradio credit.

@@ -100,6 +100,7 @@ if ($gpu.Vendor -eq "NVIDIA") {
         Install-Package -Id "diffusers" -Version "0.36.0" -Uv $Uv
         Install-Package -Id "peft" -Version "0.18.1" -Uv $Uv
         Install-Package -Id "sdnq" -Version "0.1.3" -Uv $Uv
+        Install-Package -Id "platformdirs" -Version "4.9.2" -Uv $Uv
         Install-Package -Id "gradio" -Version "6.2.0" -Uv $Uv
         $optimized = $true
     }
@@ -120,6 +121,7 @@ else {
     Install-Package -Id "diffusers" -Version "0.36.0" -Uv $Uv
     Install-Package -Id "peft" -Version "0.18.1" -Uv $Uv
     Install-Package -Id "sdnq" -Version "0.1.3" -Uv $Uv
+    Install-Package -Id "platformdirs" -Version "4.9.2" -Uv $Uv
     Install-Package -Id "gradio" -Version "6.2.0" -Uv $Uv
 }
 
