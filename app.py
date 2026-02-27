@@ -149,43 +149,43 @@ def get_aspects_and_resolutions() -> tuple:
             default aspect ratio
         )
     """
-    default_aspect_ratio = "{} (16:9)".format(t("Landscape"))
+    default_aspect_ratio = "16:9"
 
     resolutions_by_aspect = {
-        "{} (1:1)".format(t("Square")): [
+        "1:1": [
             "1024x1024",
             "1280x1280",
             "1440x1440",
         ],
-        "{} (16:9)".format(t("Landscape")): [
+        "16:9": [
             "1280x720",
             "1920x1088",
         ],
-        "{} (9:16)".format(t("Portrait")): [
+        "9:16": [
             "720x1280",
             "1088x1920",
         ],
-        "{} (4:3)".format(t("Landscape")): [
+        "4:3": [
             "1152x864",
             "1440x1088",
             "1920x1440",
         ],
-        "{} (3:4)".format(t("Portrait")): [
+        "3:4": [
             "864x1152",
             "1088x1440",
             "1440x1920",
         ],
-        "{} (16:10)".format(t("Landscape")): [
+        "16:10": [
             "1280x800",
             "1440x912",
             "1920x1200",
         ],
-        "{} (10:16)".format(t("Portrait")): [
+        "10:16": [
             "800x1280",
             "912x1440",
             "1200x1920",
         ],
-        "{} (21:9)".format(t("Ultra Wide")): [
+        "21:9": [
             "1344x576",
         ],
     }
@@ -542,6 +542,17 @@ if __name__ == "__main__":
                     visible="hidden",  # See "portal" in app.js
                     elem_id="lora-path",
                 )
+                show_seed_btn = gr.Button(
+                    "",
+                    icon=assets_dir / "juicy-fish" / "dice.png",
+                    elem_id="show-seed-btn",
+                )
+                gr.HTML(
+                    js_on_load=f"""
+                        let btn = document.getElementById("show-seed-btn")
+                        btn.title = "{t("Use a specific or random seed")}"
+                    """
+                )
                 gr.Button(
                     "",
                     icon=assets_dir / "kerismaker" / "tech_13631866.png",
@@ -573,44 +584,76 @@ if __name__ == "__main__":
                 trigger_words = gr.State(value=[None, None])
                 """Trigger words (previous, current)."""
 
-                prompt = gr.Textbox(
-                    label=t("Prompt"),
-                    lines=3,
-                    placeholder=t("Enter your prompt here..."),
-                    html_attributes=gr.InputHTMLAttributes(spellcheck=False),
-                )
+                with gr.Row():
+                    prompt = gr.Textbox(
+                        label=t("Prompt"),
+                        lines=3,
+                        placeholder=t("Enter your prompt here..."),
+                        html_attributes=gr.InputHTMLAttributes(spellcheck=False),
+                    )
+
+                with gr.Row():
+                    aspect_ratio = gr.Dropdown(
+                        value=default_aspect_ratio,
+                        choices=aspect_ratio_choices,
+                        container=False,
+                        elem_id="aspect-ratio",
+                    )
+                    gr.HTML(
+                        visible="hidden",
+                        js_on_load=f"""
+                            let select = document.getElementById("aspect-ratio")
+                            select.title = "{t("Aspect Ratio")}"
+                        """,
+                    )
+                    resolution = gr.Dropdown(
+                        value=default_resolution_choices[0],
+                        choices=default_resolution_choices,
+                        container=False,
+                        elem_id="resolution",
+                    )
+                    gr.HTML(
+                        visible="hidden",
+                        js_on_load=f"""
+                            let select = document.getElementById("resolution")
+                            select.title = "{t("Resolution")}"
+                        """,
+                    )
+                    generate_btn = gr.Button(
+                        t("Generate Image"),
+                        variant="primary",
+                    )
 
                 with gr.Row(visible=False) as lora_row:
-                    with gr.Column():
-                        lora_strength = gr.Slider(
-                            label=t("LoRA Strength"),
-                            minimum=-2.5,
-                            maximum=2.5,
-                            step=0.1,
-                            value=1.0,
-                        )
-                        lora_strength.change(
-                            set_lora_strength,
-                            inputs=lora_strength,
-                        )
-                    with gr.Column():
-                        unload_lora_btn = gr.Button(t("Unload LoRA"))
+                    lora_strength = gr.Slider(
+                        scale=2,
+                        label=t("LoRA Strength"),
+                        minimum=-2.5,
+                        maximum=2.5,
+                        step=0.1,
+                        value=1.0,
+                    )
+                    lora_strength.change(
+                        set_lora_strength,
+                        inputs=lora_strength,
+                    )
+                    unload_lora_btn = gr.Button(t("Unload LoRA"))
 
-                        # On "Unload LoRA" button click:
-                        # - unload LoRA model,
-                        # - remove trigger word from prompt,
-                        # - empty trigger words history,
-                        # - make LoRA row invisible.
-                        unload_lora_btn.click(
-                            unload_lora,
-                        ).then(
-                            remove_trigger_word,
-                            inputs=[trigger_words, prompt],
-                            outputs=[trigger_words, prompt],
-                        ).then(
-                            lambda: gr.update(visible=False),
-                            outputs=lora_row,
-                        )
+                    # On "Unload LoRA" button click:
+                    # - unload LoRA model,
+                    # - remove trigger word from prompt,
+                    # - empty trigger words history,
+                    # - make LoRA row invisible.
+                    unload_lora_btn.click(
+                        unload_lora,
+                    ).then(
+                        remove_trigger_word,
+                        inputs=[trigger_words, prompt],
+                        outputs=[trigger_words, prompt],
+                    ).then(
+                        lambda: gr.update(visible=False),
+                        outputs=lora_row,
+                    )
 
                 # When a LoRA path is selected:
                 # - discard appended timestamp,
@@ -633,31 +676,21 @@ if __name__ == "__main__":
                     outputs=lora_row,
                 )
 
-                with gr.Row():
-                    with gr.Column():
-                        aspect_ratio = gr.Dropdown(
-                            value=default_aspect_ratio,
-                            choices=aspect_ratio_choices,
-                            label=t("Aspect Ratio"),
-                        )
-                    with gr.Column():
-                        resolution = gr.Dropdown(
-                            value=default_resolution_choices[0],
-                            choices=default_resolution_choices,
-                            label=t("Resolution"),
-                        )
-
-                with gr.Row():
-                    with gr.Column():
-                        advanced_checkbox = gr.Checkbox(
-                            label=t("Advanced Settings"), value=False
-                        )
-                    with gr.Column():
-                        generate_btn = gr.Button(t("Generate Image"), variant="primary")
-
-                with gr.Row(visible=False) as seed_random_row:
+                with gr.Row(visible=False) as seed_row:
                     seed = gr.Number(label=t("Seed"), value=42, precision=0)
                     random_seed = gr.Checkbox(label=t("Random"), value=True)
+
+                show_seed_state = gr.State(value=False)
+
+                def toggle_seed_row(visibility):
+                    visibility = not visibility
+                    return visibility, gr.update(visible=visibility)
+
+                show_seed_btn.click(
+                    toggle_seed_row,
+                    inputs=show_seed_state,
+                    outputs=[show_seed_state, seed_row],
+                )
 
                 with gr.Row(visible=False) as steps_row:
                     steps = gr.Slider(
@@ -667,15 +700,6 @@ if __name__ == "__main__":
                         value=8,
                         step=1,
                     )
-
-                def advanced_rows_visibility(v):
-                    return gr.update(visible=v), gr.update(visible=v)
-
-                advanced_checkbox.change(
-                    advanced_rows_visibility,
-                    inputs=advanced_checkbox,
-                    outputs=[seed_random_row, steps_row],
-                )
 
                 prompts_history = get_prompts_history(
                     output_dir,
@@ -713,10 +737,10 @@ if __name__ == "__main__":
                     label=t("Example Prompts"),
                 )
 
-            with gr.Column():
+            with gr.Column(scale=2):
                 gallery_images = gr.Gallery(
                     label=t("Generated Images"),
-                    columns=2,
+                    columns=3,
                     rows=2,
                     height=600,
                     object_fit="contain",
@@ -764,7 +788,10 @@ if __name__ == "__main__":
             return gr.update(value=resolution_choices[0], choices=resolution_choices)
 
         aspect_ratio.change(
-            update_resolution_choices, inputs=aspect_ratio, outputs=resolution
+            update_resolution_choices,
+            inputs=aspect_ratio,
+            outputs=resolution,
+            show_progress="hidden",
         )
 
         generate_btn.click(
