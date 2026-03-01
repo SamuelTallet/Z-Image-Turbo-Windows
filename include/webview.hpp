@@ -19,7 +19,6 @@ public:
 
     void Initialize(HWND parent, const std::wstring& url);
     void Resize(const RECT& bounds);
-    void OpenWithDefaultBrowser(const std::wstring& url);
     std::wstring OpenNativeFileDialog(HWND parent);
     
     HWND CreateWin(HINSTANCE hInstance, const std::wstring& title);

@@ -2,31 +2,12 @@
  * ZPix Gradio app custom JavaScript.
  */
 
-// Delegate events for some elements.
+// Delegate events to work with Gradio rendering.
 document.addEventListener("click", (event) => {
     if (event.target.closest("#swap-lora-btn")) {
         return swapLora()
     }
-
-    /** @type {HTMLAnchorElement | null} */
-    const link = event.target.closest("a")
-
-    if (link && link.target === "_blank") {
-        openExternalLink(link, event)
-    }
 })
-
-/**
- * Open a link in default browser.
- *
- * @param {HTMLAnchorElement} link
- * @param {Event} event
- */
-function openExternalLink(link, event) {
-    event.preventDefault() // Instead of opening a new webview
-    // thanks to a custom binding. See webview.cpp
-    window.openWithDefaultBrowser(link.href)
-}
 
 /**
  * Swap LoRA.

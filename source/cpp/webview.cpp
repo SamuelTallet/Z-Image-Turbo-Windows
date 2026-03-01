@@ -62,10 +62,7 @@ void Webview::Initialize(HWND parent, const std::wstring& url) {
                                             args->TryGetWebMessageAsString(&message);
                                             if (message) {
                                                 std::wstring msg(message);
-                                                if (msg.find(L"open_external:") == 0) {
-                                                    std::wstring url = msg.substr(14);
-                                                    OpenWithDefaultBrowser(url);
-                                                } else if (msg.find(L"open_file_dialog:") == 0) {
+                                                if (msg.find(L"open_file_dialog:") == 0) {
                                                     std::wstring callbackId = msg.substr(17);
                                                     HWND parent = nullptr;
                                                     webviewController->get_ParentWindow(&parent);
@@ -84,7 +81,6 @@ void Webview::Initialize(HWND parent, const std::wstring& url) {
                                         }).Get(), nullptr);
 
                                 webviewWindow->AddScriptToExecuteOnDocumentCreated(
-                                    L"window.openWithDefaultBrowser = function(url) { window.chrome.webview.postMessage('open_external:' + url); };"
                                     L"window._fileDialogId = 0;"
                                     L"window.openNativeFileDialog = function() {"
                                     L"  return new Promise(function(resolve) {"
@@ -111,10 +107,6 @@ void Webview::Resize(const RECT& bounds) {
     if (webviewController) {
         webviewController->put_Bounds(bounds);
     }
-}
-
-void Webview::OpenWithDefaultBrowser(const std::wstring& url) {
-    ShellExecuteW(nullptr, L"open", url.c_str(), nullptr, nullptr, SW_SHOWNORMAL);
 }
 
 std::wstring Webview::OpenNativeFileDialog(HWND parent) {

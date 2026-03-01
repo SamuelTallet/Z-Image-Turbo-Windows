@@ -522,20 +522,21 @@ if __name__ == "__main__":
     ) as app:
         with gr.Row(elem_classes=[] if tou.accepted() else ["blurred"]) as ui_row:
             with gr.Column(min_width=48, elem_classes=["sidebar"]):
-                gr.Button(
+                visit_home_btn = gr.Button(
                     "",
                     icon=assets_dir / "noto-emoji" / "emoji_u26a1.svg",
-                    link=get_metadata("HOME_URL"),
-                    link_target="_blank",  # Opens default browser. See app.js
-                    elem_id="home-btn",
+                    elem_id="visit-home-btn",
                 )
                 gr.HTML(
                     js_on_load=f"""
-                        let btn = document.getElementById("home-btn")
+                        let btn = document.getElementById("visit-home-btn")
                         btn.title = "{t("Visit project homepage to check updates")}"
                     """
                 )
-                gr.Button(
+                visit_home_btn.click(
+                    lambda: open_with_default_app(get_metadata("HOME_URL")),
+                )
+                swap_lora_btn = gr.Button(
                     "",
                     icon=assets_dir / "lora_grad.svg",
                     elem_id="swap-lora-btn",
@@ -561,24 +562,25 @@ if __name__ == "__main__":
                         btn.title = "{t("Use a specific or random seed")}"
                     """
                 )
-                gr.Button(
+                access_faq_btn = gr.Button(
                     "",
                     icon=assets_dir / "kerismaker" / "tech_13631866.png",
-                    link=f"{get_metadata('HOME_URL')}/blob/main/docs/FAQ.md",
-                    link_target="_blank",
-                    elem_id="faq-btn",
+                    elem_id="access-faq-btn",
                 )
                 gr.HTML(
                     js_on_load=f"""
-                        let btn = document.getElementById("faq-btn")
+                        let btn = document.getElementById("access-faq-btn")
                         btn.title = "{t("Access the FAQ of this application")}"
                     """
                 )
-                gr.Button(
+                access_faq_btn.click(
+                    lambda: open_with_default_app(
+                        f"{get_metadata('HOME_URL')}/blob/main/docs/FAQ.md"
+                    ),
+                )
+                donate_btn = gr.Button(
                     "",
                     icon=assets_dir / "kofi_symbol.svg",
-                    link=get_metadata("DONATE_URL"),
-                    link_target="_blank",
                     elem_id="donate-btn",
                 )
                 gr.HTML(
@@ -586,6 +588,9 @@ if __name__ == "__main__":
                         let btn = document.getElementById("donate-btn")
                         btn.title = "{t("Keep project developer awake with a coffee")} 😄"
                     """
+                )
+                donate_btn.click(
+                    lambda: open_with_default_app(get_metadata("DONATE_URL")),
                 )
 
             with gr.Column():
