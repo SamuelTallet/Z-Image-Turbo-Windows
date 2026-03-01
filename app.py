@@ -536,7 +536,7 @@ if __name__ == "__main__":
                 visit_home_btn.click(
                     lambda: open_with_default_app(get_metadata("HOME_URL")),
                 )
-                swap_lora_btn = gr.Button(
+                gr.Button(
                     "",
                     icon=assets_dir / "lora_grad.svg",
                     elem_id="swap-lora-btn",
