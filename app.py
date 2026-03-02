@@ -767,7 +767,15 @@ if __name__ == "__main__":
                 open_output_folder_btn = gr.Button(
                     t("Open Output Folder"),
                     variant="primary",
+                    elem_id="open-output-folder-btn",
                     elem_classes=["align-right"],
+                )
+                gr.HTML(
+                    visible="hidden",
+                    js_on_load=f"""
+                        let btn = document.getElementById("open-output-folder-btn")
+                        btn.title = "{t("of generated images")}"
+                    """,
                 )
 
                 def create_open_output_dir():
