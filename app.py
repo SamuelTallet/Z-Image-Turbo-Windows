@@ -20,6 +20,7 @@ from torch import bfloat16, cuda, manual_seed, xpu
 
 from source.py.disclaimer import TERMS_OF_USE, TermsOfUse
 from source.py.gen_history import (
+    PROMPTS_HISTORY_MAX_ROWS,
     add_prompt_to_history,
     get_prompts_history,
     on_prompts_history_row_select,
@@ -714,10 +715,7 @@ if __name__ == "__main__":
                         step=1,
                     )
 
-                prompts_history = get_prompts_history(
-                    output_dir,
-                    max_prompts=100,
-                )
+                prompts_history = get_prompts_history(output_dir)
                 prompts_history_frame = gr.DataFrame(
                     visible=bool(prompts_history),
                     label=t("Previous Prompts"),
@@ -734,11 +732,14 @@ if __name__ == "__main__":
                     outputs=prompt,
                     show_progress="hidden",
                 )
+                prompts_history_search_title = t("among last {number} prompts").format(
+                    number=PROMPTS_HISTORY_MAX_ROWS
+                )
                 gr.HTML(
                     js_on_load=f"""
                         let input = document.querySelector("#prompts-history .search-input")
                         input.placeholder = "{t("Search...")}"
-                        input.title = "{t("among last 100 prompts")}"
+                        input.title = "{prompts_history_search_title}"
                         input.spellcheck = false
                     """
                 )

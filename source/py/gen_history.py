@@ -5,13 +5,15 @@ from pathlib import Path
 
 import gradio as gr
 
+PROMPTS_HISTORY_MAX_ROWS = 300
+"""Maximum searchable prompts in history frame."""
 
-def get_prompts_history(input_dir: Path, max_prompts: int) -> list[str]:
+
+def get_prompts_history(input_dir: Path) -> list[str]:
     """Get prompts history.
 
     Args:
         input_dir: Directory containing generated images and their prompts.
-        max_prompts: Maximum number of prompts to return.
 
     Returns:
         A list of unique prompts, most recent first.
@@ -19,15 +21,12 @@ def get_prompts_history(input_dir: Path, max_prompts: int) -> list[str]:
     if not isinstance(input_dir, Path):
         raise TypeError("input_dir must be a Path")
 
-    if not isinstance(max_prompts, int):
-        raise TypeError("max_prompts must be an int")
-
     prompts: list[str] = []  # We don't use a set to keep order.
 
-    recent_images_files = sorted(
+    recent_images_files: list[Path] = sorted(
         input_dir.glob("image-[0-9]*.png"),  # Pattern: image-{timestamp}.png
         reverse=True,
-    )[:max_prompts]
+    )[:PROMPTS_HISTORY_MAX_ROWS]
 
     # Filesystem is used as a database.
     # This shortcut implies to be cautious about file existence and contents.

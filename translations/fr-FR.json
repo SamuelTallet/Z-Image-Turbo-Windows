@@ -22,7 +22,7 @@
     "of generated images": "des images générées",
     "Previous Prompts": "Prompts précédents",
     "Search...": "Rechercher...",
-    "among last 100 prompts": "parmi les 100 derniers prompts",
+    "among last {number} prompts": "parmi les {number} derniers prompts",
     "Source model": "Modèle source",
     "Terms of Use": "Conditions d'utilisation",
     "By using this application to create images, I engage to respect copyright and person's image right, and I also engage not mislead others.": "En utilisant cette application pour créer des images, je m'engage à respecter les droits d'auteur et le droit à l'image des personnes, et je m'engage également à ne pas induire les autres en erreur.",
