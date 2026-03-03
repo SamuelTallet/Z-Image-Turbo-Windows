@@ -65,14 +65,21 @@
     display: none;
 }
 
-#prompts-history .table {
-    font-family: var(--font);
-    overflow: hidden;
-    /* Hide scrollbar */
-}
-
 #prompts-history .table-wrap {
     mask-image: linear-gradient(to bottom, white 70%, transparent);
+}
+
+#prompts-history.fullscreen .table-wrap {
+    mask-image: linear-gradient(to bottom, white 90%, transparent);
+}
+
+#prompts-history .table {
+    font-family: var(--font);
+    overflow: hidden; /* Hide scrollbars */
+}
+
+#prompts-history.fullscreen .table {
+    max-height: 100%;
 }
 
 #prompts-history thead {
