@@ -760,12 +760,12 @@ if __name__ == "__main__":
                     label=t("Generated Images"),
                     columns=3,
                     rows=2,
-                    height=700,
                     object_fit="contain",
                     format="png",
                     type="filepath",
                     buttons=["fullscreen"],
                     interactive=False,
+                    elem_id="gallery",
                 )
                 last_image_index = gr.State(value=None)
 
