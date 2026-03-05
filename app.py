@@ -760,7 +760,7 @@ if __name__ == "__main__":
                     label=t("Generated Images"),
                     columns=3,
                     rows=2,
-                    height=600,
+                    height=700,
                     object_fit="contain",
                     format="png",
                     type="filepath",
@@ -792,6 +792,7 @@ if __name__ == "__main__":
         with gr.Row():
             # Add source model link to footer, after Gradio credit.
             gr.HTML(
+                visible="hidden",
                 js_on_load=f"""
                     document.querySelector("footer").insertAdjacentHTML(
                         "beforeend",
@@ -802,7 +803,7 @@ if __name__ == "__main__":
                             {t("Source model")} 🤗
                         </a>`
                     )
-                """
+                """,
             )
 
         with gr.Row(
