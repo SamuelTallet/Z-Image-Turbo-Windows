@@ -24,14 +24,14 @@ def get_prompts_history(input_dir: Path) -> list[str]:
     prompts: list[str] = []  # We don't use a set to keep order.
 
     recent_images_files: list[Path] = sorted(
-        input_dir.glob("image-[0-9]*.png"),  # Pattern: image-{timestamp}.png
+        input_dir.glob("**/image-[0-9]*.png"),  # Timestamp is in filename.
         reverse=True,
     )[:PROMPTS_HISTORY_MAX_ROWS]
 
     # Filesystem is used as a database.
     # This shortcut implies to be cautious about file existence and contents.
     for image_file in recent_images_files:
-        prompt_file = input_dir / f"{image_file.stem}.prompt.txt"
+        prompt_file = image_file.parent / f"{image_file.stem}.prompt.txt"
 
         if not prompt_file.exists():
             warning(f"{prompt_file} doesn't exist")

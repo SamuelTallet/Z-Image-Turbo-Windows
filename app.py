@@ -422,12 +422,13 @@ def generate_image(
 
 
 def generate(
-    prompt,
+    prompt: str,
     resolution="1024x1024",
     seed=42,
     random_seed=True,
     steps=8,
     gallery_images=None,
+    lora_name: str | None = None,
 ):
     """Generate an image and possibly a seed, and update gallery.
 
@@ -438,7 +439,7 @@ def generate(
         random_seed: Ignore seed argument and generate a seed?
         steps: Number of inference (denoising) steps.
         gallery_images: Existing gallery images to append to.
-
+        lora_name: Name of loaded LoRA (e.g. "Anime_20").
     Returns:
         Tuple of (updated gallery, last image index, used seed).
 
@@ -484,7 +485,10 @@ def generate(
         seed=used_seed,
         steps=int(steps),
     )
-    image_file, _prompt_file, _settings_file = generation.save(output_dir)
+    # LoRA name (if provided) is included in output path.
+    image_file, _prompt_file, _settings_file = generation.save(
+        output_dir / lora_name if lora_name else output_dir
+    )
 
     if gallery_images is None:
         gallery_images = []
@@ -537,6 +541,7 @@ if __name__ == "__main__":
                 visit_home_btn.click(
                     lambda: open_with_default_app(get_metadata("HOME_URL")),
                 )
+
                 gr.Button(
                     "",
                     icon=assets_dir / "lora_grad.svg",
@@ -552,6 +557,9 @@ if __name__ == "__main__":
                     visible="hidden",  # See "portal" in app.js
                     elem_id="lora-path",
                 )
+                lora_name = gr.State(value=None)
+                """Name of loaded LoRA."""
+
                 show_seed_btn = gr.Button(
                     "",
                     icon=assets_dir / "juicy-fish" / "dice.png",
@@ -563,6 +571,7 @@ if __name__ == "__main__":
                         btn.title = "{t("Use a specific or random seed")}"
                     """
                 )
+
                 access_faq_btn = gr.Button(
                     "",
                     icon=assets_dir / "kerismaker" / "tech_13631866.png",
@@ -579,6 +588,7 @@ if __name__ == "__main__":
                         f"{get_metadata('HOME_URL')}/blob/main/docs/FAQ.md"
                     ),
                 )
+
                 donate_btn = gr.Button(
                     "",
                     icon=assets_dir / "kofi_symbol.svg",
@@ -657,7 +667,8 @@ if __name__ == "__main__":
                     # - unload LoRA model,
                     # - remove trigger word from prompt,
                     # - empty trigger words history,
-                    # - make LoRA row invisible.
+                    # - make LoRA row invisible,
+                    # - forget name of loaded LoRA.
                     unload_lora_btn.click(
                         unload_lora,
                     ).then(
@@ -667,6 +678,9 @@ if __name__ == "__main__":
                     ).then(
                         lambda: gr.update(visible=False),
                         outputs=lora_row,
+                    ).then(
+                        lambda: None,
+                        outputs=lora_name,
                     )
 
                 # When a LoRA path is selected:
@@ -675,7 +689,8 @@ if __name__ == "__main__":
                 # - load selected LoRA model,
                 # - shift trigger words history,
                 # - update trigger word in prompt,
-                # - make LoRA row visible.
+                # - make LoRA row visible,
+                # - remember name of loaded LoRA.
                 lora_path.change(
                     lambda p, tw: [tw[1], swap_lora(p)],
                     inputs=[lora_path, trigger_words],
@@ -688,6 +703,10 @@ if __name__ == "__main__":
                 ).then(
                     lambda: gr.update(visible=True),
                     outputs=lora_row,
+                ).then(
+                    lambda p: Path(p).stem,
+                    inputs=lora_path,
+                    outputs=lora_name,
                 )
 
                 with gr.Row(visible=False) as seed_row:
@@ -841,7 +860,15 @@ if __name__ == "__main__":
 
         generate_btn.click(
             generate,
-            inputs=[prompt, resolution, seed, random_seed, steps, gallery_images],
+            inputs=[
+                prompt,
+                resolution,
+                seed,
+                random_seed,
+                steps,
+                gallery_images,
+                lora_name,
+            ],
             outputs=[gallery_images, last_image_index, seed],
             show_progress_on=gallery_images,
         ).then(
