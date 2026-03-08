@@ -758,8 +758,6 @@ if __name__ == "__main__":
             with gr.Column(scale=2):
                 gallery_images = gr.Gallery(
                     label=t("Generated Images"),
-                    columns=3,
-                    rows=2,
                     object_fit="contain",
                     format="png",
                     type="filepath",
@@ -768,6 +766,14 @@ if __name__ == "__main__":
                     elem_id="gallery",
                 )
                 last_image_index = gr.State(value=None)
+
+                # Prevent grid display.
+                gallery_images.preview_close(
+                    lambda idx: gr.update(selected_index=idx),
+                    inputs=last_image_index,
+                    outputs=gallery_images,
+                    show_progress="hidden",
+                )
 
                 open_output_folder_btn = gr.Button(
                     t("Open Output Folder"),

@@ -55,7 +55,11 @@
     height: 82vh;
 }
 
-.gallery-container .caption {
+#gallery .icon-button:nth-child(2) {
+    display: none; /* Hide "Close" preview button */
+}
+
+#gallery .caption {
     padding: 0.1em;
     font-weight: normal;
     white-space: break-spaces;
@@ -65,7 +69,7 @@
     line-clamp: 1;
 }
 
-.fullscreen .gallery-container .caption {
+#gallery.fullscreen .caption {
     display: none;
 }
 
