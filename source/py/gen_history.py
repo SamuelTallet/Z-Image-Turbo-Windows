@@ -1,7 +1,7 @@
 """Generations history."""
 
-from logging import warning
 from pathlib import Path
+from sqlite3 import Connection, Cursor, connect
 
 import gradio as gr
 
@@ -9,52 +9,79 @@ PROMPTS_HISTORY_MAX_ROWS = 300
 """Maximum searchable prompts in history frame."""
 
 
-def get_prompts_history(input_dir: Path) -> list[str]:
+def _open_prompts_history_db(sqlite_file: Path) -> Connection:
+    """Open prompts history database.
+
+    Args:
+        sqlite_file: Path to prompts history SQLite database.
+
+    Returns:
+        SQLite database connection.
+    """
+    sqlite_file.parent.mkdir(parents=True, exist_ok=True)
+
+    return connect(sqlite_file)
+
+
+def _init_prompts_history_table(sqlite_cursor: Cursor) -> None:
+    """Initialize prompts history database table if needed.
+
+    Args:
+        sqlite_cursor: A SQLite cursor.
+    """
+    sqlite_cursor.execute(
+        """
+        CREATE TABLE IF NOT EXISTS prompts (
+            id INTEGER PRIMARY KEY,
+            prompt TEXT NOT NULL
+        );
+        """
+    )
+
+
+def get_prompts_history(sqlite_file: Path) -> list[str]:
     """Get prompts history.
 
     Args:
-        input_dir: Directory containing generated images and their prompts.
+        sqlite_file: Path to prompts history SQLite database.
 
     Returns:
         A list of unique prompts, most recent first.
     """
-    if not isinstance(input_dir, Path):
-        raise TypeError("input_dir must be a Path")
+    if not isinstance(sqlite_file, Path):
+        raise TypeError("sqlite_file must be a Path")
 
-    prompts: list[str] = []  # We don't use a set to keep order.
+    sqlite_connection = _open_prompts_history_db(sqlite_file)
+    sqlite_cursor = sqlite_connection.cursor()
 
-    recent_images_files: list[Path] = sorted(
-        input_dir.glob("**/image-[0-9]*.png"),  # Timestamp is in filename.
-        reverse=True,
-    )[:PROMPTS_HISTORY_MAX_ROWS]
+    _init_prompts_history_table(sqlite_cursor)
 
-    # Filesystem is used as a database.
-    # This shortcut implies to be cautious about file existence and contents.
-    for image_file in recent_images_files:
-        prompt_file = image_file.parent / f"{image_file.stem}.prompt.txt"
+    sqlite_result = sqlite_cursor.execute(
+        """
+        SELECT DISTINCT prompt 
+        FROM prompts
+        ORDER BY id DESC 
+        LIMIT ?;
+        """,
+        (PROMPTS_HISTORY_MAX_ROWS,),
+    )
 
-        if not prompt_file.exists():
-            warning(f"{prompt_file} doesn't exist")
-            continue
+    prompts: list[str] = []
 
-        try:
-            prompt = prompt_file.read_text(encoding="utf-8")
-        except Exception as error:
-            warning(f"Failed to read {prompt_file}: {error}")
-            continue
+    for sqlite_row in sqlite_result:
+        prompts.append(sqlite_row[0])
 
-        if prompt and prompt not in prompts:
-            prompts.append(prompt)
+    sqlite_connection.close()
 
     return prompts
 
 
-def add_prompt_to_history(candidate_prompt: str, history: list[list[str]]):
+def add_prompt_to_history_frame(candidate_prompt: str, history: list[list[str]]):
     """Add a new entry to prompts history frame
     and ensure this frame is visible.
 
     Args:
-        candidate_prompt: Prompt we want to add to history.
+        candidate_prompt: Prompt we want to add to history frame.
         history: Current prompts history.
 
     Returns:
@@ -67,6 +94,29 @@ def add_prompt_to_history(candidate_prompt: str, history: list[list[str]]):
 
     history.insert(0, [new_prompt])
     return gr.update(value=history, visible=True)
+
+
+def insert_prompt_in_history_db(prompt: str, sqlite_file: Path) -> None:
+    """Insert a prompt into dedicated history database.
+
+    Args:
+        prompt: Prompt to insert into history database.
+        sqlite_file: Path to prompts history SQLite database.
+    """
+    sqlite_connection = _open_prompts_history_db(sqlite_file)
+    sqlite_cursor = sqlite_connection.cursor()
+
+    _init_prompts_history_table(sqlite_cursor)
+
+    sqlite_cursor.execute(
+        """
+        INSERT INTO prompts (prompt) VALUES (?);
+        """,
+        (prompt,),
+    )
+
+    sqlite_connection.commit()
+    sqlite_connection.close()
 
 
 def on_prompts_history_row_select(event: gr.SelectData) -> str:

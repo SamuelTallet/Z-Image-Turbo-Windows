@@ -1,6 +1,6 @@
 """ZPix Gradio app."""
-# Based on https://huggingface.co/spaces/Tongyi-MAI/Z-Image-Turbo
 
+# Based on https://huggingface.co/spaces/Tongyi-MAI/Z-Image-Turbo
 import logging
 from argparse import ArgumentParser
 from json import load as load_json
@@ -9,9 +9,11 @@ from pathlib import Path
 from random import randint
 from re import search
 from shutil import rmtree
+from time import time
 
 import gradio as gr
 from diffusers import ZImagePipeline
+from PIL.PngImagePlugin import PngInfo
 from platformdirs import user_pictures_path
 from sdnq import SDNQConfig  # noqa: F401
 from sdnq.common import use_torch_compile as triton_is_available
@@ -21,11 +23,11 @@ from torch import bfloat16, cuda, manual_seed, xpu
 from source.py.disclaimer import TERMS_OF_USE, TermsOfUse
 from source.py.gen_history import (
     PROMPTS_HISTORY_MAX_ROWS,
-    add_prompt_to_history,
+    add_prompt_to_history_frame,
     get_prompts_history,
+    insert_prompt_in_history_db,
     on_prompts_history_row_select,
 )
-from source.py.generation import Generation
 from source.py.lora_model import LoraModel
 from source.py.os_abstract import open_with_default_app
 
@@ -50,13 +52,16 @@ assets_dir = app_dir / "assets"
 gr.set_static_paths(paths=[assets_dir])
 
 output_dir: Path
-"""The folder where ZPix saves generated images, prompts, etc."""
+"""The folder where ZPix saves generated images."""
 
 try:
     output_dir = user_pictures_path() / "ZPix"
 except Exception:
     logging.warning("Can't get user pictures path, using default.")
     output_dir = Path.home() / "Pictures" / "ZPix"
+
+prompts_history_db = Path.home() / ".zpix" / "prompts_history.sqlite"
+"""Path to prompts history SQLite database."""
 
 translation: dict[str, str] = {}
 """Translation."""
@@ -467,6 +472,7 @@ def generate(
         "seed": used_seed,
         "num_inference_steps": int(steps + 1),
     }
+
     try:
         image = generate_image(**generation_args)
     except UnicodeDecodeError:
@@ -477,18 +483,24 @@ def generate(
         gr.Info(t("Regenerating same image..."), duration=8)
         image = generate_image(**generation_args)
 
-    generation = Generation(
-        model="Z-Image Turbo",  # TODO: Make this dynamic.
-        image=image,
-        prompt=prompt,
-        resolution=resolution,
-        seed=used_seed,
-        steps=int(steps),
-    )
+    # Prepare metadata to be saved in PNG text chunks.
+    image_metadata = PngInfo()
+    image_metadata.add_itxt("prompt", prompt)
+    image_metadata.add_text("seed", str(used_seed))
+    image_metadata.add_text("steps", str(steps))
+
+    image_basename = f"image_{time():.0f}.png"
+
     # LoRA name (if provided) is included in output path.
-    image_file, _prompt_file, _settings_file = generation.save(
-        output_dir / lora_name if lora_name else output_dir
-    )
+    if lora_name:
+        image_file = output_dir / lora_name / image_basename
+    else:
+        image_file = output_dir / image_basename
+
+    # Ensure output directory exists.
+    image_file.parent.mkdir(parents=True, exist_ok=True)
+
+    image.save(image_file, pnginfo=image_metadata)
 
     if gallery_images is None:
         gallery_images = []
@@ -734,7 +746,7 @@ if __name__ == "__main__":
                         step=1,
                     )
 
-                prompts_history = get_prompts_history(output_dir)
+                prompts_history = get_prompts_history(prompts_history_db)
                 prompts_history_frame = gr.DataFrame(
                     visible=bool(prompts_history),
                     label=t("Previous Prompts"),
@@ -877,9 +889,12 @@ if __name__ == "__main__":
             inputs=last_image_index,
             outputs=gallery_images,
         ).then(
-            add_prompt_to_history,
+            add_prompt_to_history_frame,
             inputs=[prompt, prompts_history_frame],
             outputs=[prompts_history_frame],
+        ).then(
+            lambda p: insert_prompt_in_history_db(p, prompts_history_db),
+            inputs=prompt,
         )
 
         app.load(on_app_load)
