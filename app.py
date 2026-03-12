@@ -41,9 +41,14 @@ environ["TRITON_CACHE_DIR"] = str(Path.home() / ".triton")
 app_dir = Path(__file__).parent
 """App directory."""
 
-# We store temp files created by this app in a local directory
-# so we can remove them later without impacting other Gradio apps.
-environ["GRADIO_TEMP_DIR"] = str(app_dir / "temp" / "GradioApp")
+# As we store temp files created by Gradio in this app' subfolder
+# we can remove them without worry about impacting other Gradio apps.
+gradio_temp_dir = app_dir / "temp" / "GradioApp"
+environ["GRADIO_TEMP_DIR"] = str(gradio_temp_dir)
+
+# This temp directory may hold files existing also in output directory
+# so we clear it on each app run to save space.
+rmtree(gradio_temp_dir, ignore_errors=True)
 
 assets_dir = app_dir / "assets"
 """Assets directory."""
