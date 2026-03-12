@@ -33,7 +33,7 @@ def _init_prompts_history_table(sqlite_cursor: Cursor) -> None:
         """
         CREATE TABLE IF NOT EXISTS prompts (
             id INTEGER PRIMARY KEY,
-            prompt TEXT NOT NULL
+            prompt TEXT NOT NULL UNIQUE
         );
         """
     )
@@ -58,7 +58,7 @@ def get_prompts_history(sqlite_file: Path) -> list[str]:
 
     sqlite_result = sqlite_cursor.execute(
         """
-        SELECT DISTINCT prompt 
+        SELECT prompt
         FROM prompts
         ORDER BY id DESC 
         LIMIT ?;
@@ -97,7 +97,7 @@ def add_prompt_to_history_frame(candidate_prompt: str, history: list[list[str]])
 
 
 def insert_prompt_in_history_db(prompt: str, sqlite_file: Path) -> None:
-    """Insert a prompt into dedicated history database.
+    """Insert a new prompt into dedicated history database.
 
     Args:
         prompt: Prompt to insert into history database.
@@ -110,7 +110,9 @@ def insert_prompt_in_history_db(prompt: str, sqlite_file: Path) -> None:
 
     sqlite_cursor.execute(
         """
-        INSERT INTO prompts (prompt) VALUES (?);
+        INSERT INTO prompts (prompt)
+        VALUES (?)
+        ON CONFLICT (prompt) DO NOTHING;
         """,
         (prompt,),
     )

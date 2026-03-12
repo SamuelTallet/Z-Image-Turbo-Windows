@@ -746,7 +746,13 @@ if __name__ == "__main__":
                         step=1,
                     )
 
-                prompts_history = get_prompts_history(prompts_history_db)
+                try:
+                    prompts_history = get_prompts_history(prompts_history_db)
+                except Exception as e:
+                    logging.warning(f"Can't get prompts history: {e}")
+                    # Prompts history isn't essential, let's continue without.
+                    prompts_history = []
+
                 prompts_history_frame = gr.DataFrame(
                     visible=bool(prompts_history),
                     label=t("Previous Prompts"),
