@@ -5,7 +5,7 @@ from sqlite3 import Connection, Cursor, connect
 
 import gradio as gr
 
-SEARCHABLE_PROMPTS = 300
+SEARCHABLE_PROMPTS = 100
 """Maximum searchable prompts in history frame."""
 
 
