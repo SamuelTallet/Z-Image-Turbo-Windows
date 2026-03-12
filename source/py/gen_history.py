@@ -33,7 +33,15 @@ def _init_prompts_history_table(sqlite_cursor: Cursor) -> None:
         """
         CREATE TABLE IF NOT EXISTS prompts (
             id INTEGER PRIMARY KEY,
-            prompt TEXT NOT NULL UNIQUE
+            prompt TEXT NOT NULL UNIQUE,
+            created_at INTEGER NOT NULL DEFAULT (unixepoch())
+        );
+        """
+    )
+    sqlite_cursor.execute(
+        """
+        CREATE INDEX IF NOT EXISTS idx_recent_prompts ON prompts (
+            created_at DESC
         );
         """
     )
@@ -60,7 +68,7 @@ def get_prompts_history(sqlite_file: Path) -> list[str]:
         """
         SELECT prompt
         FROM prompts
-        ORDER BY id DESC 
+        ORDER BY created_at DESC
         LIMIT ?;
         """,
         (PROMPTS_HISTORY_MAX_ROWS,),
@@ -81,7 +89,7 @@ def add_prompt_to_history_frame(candidate_prompt: str, history: list[list[str]])
     and ensure this frame is visible.
 
     Args:
-        candidate_prompt: Prompt we want to add to history frame.
+        candidate_prompt: Prompt we want to prepend to history frame.
         history: Current prompts history.
 
     Returns:
@@ -96,13 +104,18 @@ def add_prompt_to_history_frame(candidate_prompt: str, history: list[list[str]])
     return gr.update(value=history, visible=True)
 
 
-def insert_prompt_in_history_db(prompt: str, sqlite_file: Path) -> None:
+def insert_prompt_in_history_db(candidate_prompt: str, sqlite_file: Path):
     """Insert a new prompt into dedicated history database.
 
     Args:
-        prompt: Prompt to insert into history database.
+        candidate_prompt: Prompt we want to insert into history database.
         sqlite_file: Path to prompts history SQLite database.
     """
+    new_prompt = candidate_prompt.strip()
+
+    if not new_prompt:
+        return
+
     sqlite_connection = _open_prompts_history_db(sqlite_file)
     sqlite_cursor = sqlite_connection.cursor()
 
@@ -114,7 +127,7 @@ def insert_prompt_in_history_db(prompt: str, sqlite_file: Path) -> None:
         VALUES (?)
         ON CONFLICT (prompt) DO NOTHING;
         """,
-        (prompt,),
+        (new_prompt,),
     )
 
     sqlite_connection.commit()
