@@ -5,7 +5,7 @@ from sqlite3 import Connection, Cursor, connect
 
 import gradio as gr
 
-PROMPTS_HISTORY_MAX_ROWS = 300
+SEARCHABLE_PROMPTS = 300
 """Maximum searchable prompts in history frame."""
 
 
@@ -71,7 +71,7 @@ def get_prompts_history(sqlite_file: Path) -> list[str]:
         ORDER BY created_at DESC
         LIMIT ?;
         """,
-        (PROMPTS_HISTORY_MAX_ROWS,),
+        (SEARCHABLE_PROMPTS,),
     )
 
     prompts: list[str] = []

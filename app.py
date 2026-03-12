@@ -22,7 +22,7 @@ from torch import bfloat16, cuda, manual_seed, xpu
 
 from source.py.disclaimer import TERMS_OF_USE, TermsOfUse
 from source.py.gen_history import (
-    PROMPTS_HISTORY_MAX_ROWS,
+    SEARCHABLE_PROMPTS,
     add_prompt_to_history_frame,
     get_prompts_history,
     insert_prompt_in_history_db,
@@ -774,7 +774,7 @@ if __name__ == "__main__":
                     js="() => window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }))",
                 )
                 prompts_history_search_title = t("among last {number} prompts").format(
-                    number=PROMPTS_HISTORY_MAX_ROWS
+                    number=SEARCHABLE_PROMPTS
                 )
                 gr.HTML(
                     js_on_load=f"""
