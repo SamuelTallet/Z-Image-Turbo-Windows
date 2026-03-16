@@ -1,12 +1,6 @@
 function Invoke-App {
     param (
         [Parameter(Mandatory = $true)]
-        [string]$Model, # Source model to load
-
-        [Parameter(Mandatory = $true)]
-        [string]$BackupModel, # Backup model if needed
-
-        [Parameter(Mandatory = $true)]
         [int]$Port, # Local port to use
 
         [Parameter(Mandatory = $true)]
@@ -18,8 +12,6 @@ function Invoke-App {
 
     $uvArgs = @(
         "run", "app.py",
-        "--model", $Model,
-        "--backup-model", $BackupModel,
         "--port", $Port,
         "--locale", $locale
     )

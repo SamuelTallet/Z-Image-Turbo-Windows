@@ -50,14 +50,6 @@ catch {
     }
 }
 
-# Source model to load from Hugging Face.
-# TODO: This could be dynamic, depending on selected GPU VRAM and system RAM?
-$model = "Disty0/Z-Image-Turbo-SDNQ-uint4-svd-r32"
-
-# Backup model to load from Hugging Face
-# if source model fails to load.
-$backupModel = "SamuelTallet/Z-Image-Turbo-SDNQ-uint4-svd-r32"
-
 . "source\ps\app_invoking.ps1"
 
 # Path to uv executable distributed with this app.
@@ -73,7 +65,7 @@ if (Test-Path ".venv\optimized") {
     Write-Host "Optimized Python venv found. Skipping install." -ForegroundColor Green
     try {
         Write-Host "Loading model, please wait..." -ForegroundColor Blue
-        Invoke-App -Model $model -BackupModel $backupModel -Port $Port -Uv $uv
+        Invoke-App -Port $Port -Uv $uv
         exit # to not go to install since app ran successfully if we reach this stage.
     }
     catch {
@@ -128,4 +120,4 @@ else {
 Write-Host "Installation complete." -ForegroundColor Green
 
 Write-Host "Loading model... We are nearly there!" -ForegroundColor Blue
-Invoke-App -Model $model -BackupModel $backupModel -Port $Port -Uv $uv
+Invoke-App -Port $Port -Uv $uv

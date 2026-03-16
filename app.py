@@ -28,6 +28,7 @@ from source.py.gen_history import (
     insert_prompt_in_history_db,
     on_prompts_history_row_select,
 )
+from source.py.img_model import ImageModel, get_image_models
 from source.py.lora_model import LoraModel
 from source.py.os_abstract import open_with_default_app
 
@@ -56,6 +57,21 @@ assets_dir = app_dir / "assets"
 # Let's serve assets directly.
 gr.set_static_paths(paths=[assets_dir])
 
+translation: dict[str, str] = {}
+"""Translation."""
+
+metadata: dict[str, str] = {}
+"""App metadata."""
+
+pipe: ZImagePipeline | None = None
+"""Pipeline."""
+
+pipe_is_optimized: bool = False
+"""Pipeline is optimized?"""
+
+pipe_is_busy: bool = False
+"""Pipeline is busy? e.g. loading a LoRA."""
+
 output_dir: Path
 """The folder where ZPix saves generated images."""
 
@@ -67,21 +83,6 @@ except Exception:
 
 prompts_history_db = Path.home() / ".zpix" / "prompts_history.sqlite"
 """Path to prompts history SQLite database."""
-
-translation: dict[str, str] = {}
-"""Translation."""
-
-metadata: dict[str, str] = {}
-"""Metadata."""
-
-pipe: ZImagePipeline | None = None
-"""Pipeline."""
-
-pipe_is_optimized: bool = False
-"""Pipeline is optimized?"""
-
-pipe_is_busy: bool = False
-"""Pipeline is busy? e.g. loading a LoRA."""
 
 
 def load_translation(locale: str) -> None:
@@ -277,25 +278,26 @@ def remove_trigger_word(trigger_words: list, prompt: str) -> tuple:
     return [None, None], prompt
 
 
-def load_model(model: str, backup_model: str):
-    """Load and configure the Z-Image pipeline.
-
-    Args:
-        model: Hugging Face (HF) model name.
-        backup_model: HF backup model name.
-    """
+def load_model(model: ImageModel):
+    """Load an image model pipeline."""
     global pipe
     global pipe_is_optimized
 
+    match model.pipeline:
+        case "ZImagePipeline":
+            pipe_class = ZImagePipeline
+        case _:
+            raise ValueError(f"Unsupported pipeline class: {model.pipeline}")
+
     try:
-        pipe = ZImagePipeline.from_pretrained(
-            model,
+        pipe = pipe_class.from_pretrained(
+            model.id,
             torch_dtype=bfloat16,
         )
     except Exception:
-        logging.warning(f"Can't load {model}, falling back to {backup_model}.")
-        pipe = ZImagePipeline.from_pretrained(
-            backup_model,
+        logging.warning(f"Can't load {model.id}, falling back to {model.backup_id}.")
+        pipe = pipe_class.from_pretrained(
+            model.backup_id,
             torch_dtype=bfloat16,
         )
 
@@ -400,10 +402,10 @@ def generate_image(
     seed=42,
     num_inference_steps=8,
 ):
-    """Generate an image using the Z-Image pipeline.
+    """Generate an image using pipeline.
 
     Args:
-        pipe: The loaded ZImagePipeline instance.
+        pipe: Loaded pipeline instance.
         prompt: Text prompt describing the desired image.
         resolution: Output resolution as "WIDTHxHEIGHT" string.
         seed: Random seed for reproducible generation.
@@ -518,13 +520,14 @@ def generate(
 
 if __name__ == "__main__":
     parser = ArgumentParser()
-    parser.add_argument("--model", type=str, required=True)
-    parser.add_argument("--backup-model", type=str, required=True)
     parser.add_argument("--port", type=int, required=True)
     parser.add_argument("--locale", type=str, required=False, default="en-US")
     args, _ = parser.parse_known_args()
 
-    load_model(args.model, args.backup_model)
+    models = get_image_models(app_dir / "data" / "curated_models.json")
+    # TODO Propose alternatives to Z-Image Turbo.
+
+    load_model(models[0])
 
     if args.locale != "en-US":
         load_translation(args.locale)
@@ -845,7 +848,7 @@ if __name__ == "__main__":
                     document.querySelector("footer").insertAdjacentHTML(
                         "beforeend",
                         `<a
-                            href="https://huggingface.co/{args.model}"
+                            href="https://huggingface.co/{models[0].id}"
                             target="_blank"
                         >
                             {t("Source model")} 🤗
