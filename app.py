@@ -77,7 +77,7 @@ metadata: dict[str, str] = {}
 pipe: ZImagePipeline | None = None
 """Pipeline."""
 
-optimized: bool = False
+pipe_is_optimized: bool = False
 """Pipeline is optimized?"""
 
 pipe_is_busy: bool = False
@@ -142,7 +142,7 @@ def get_theme():
 
 def on_app_load():
     """On app load."""
-    if not optimized:
+    if not pipe_is_optimized:
         gr.Warning(
             t(
                 "Image generation may be slow because diffusion pipeline is not optimized."
@@ -285,7 +285,7 @@ def load_model(model: str, backup_model: str):
         backup_model: HF backup model name.
     """
     global pipe
-    global optimized
+    global pipe_is_optimized
 
     try:
         pipe = ZImagePipeline.from_pretrained(
@@ -309,7 +309,7 @@ def load_model(model: str, backup_model: str):
         )
         try:
             pipe.transformer.set_attention_backend("_sage_qk_int8_pv_fp16_triton")
-            optimized = True
+            pipe_is_optimized = True
         except Exception as e:
             logging.warning(f"SageAttention is not available: {e}")
 
