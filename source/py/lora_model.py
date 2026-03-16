@@ -7,7 +7,7 @@ from torch import bfloat16
 
 
 class LoraModel:
-    """LoRA model."""
+    """A LoRA model."""
 
     def __init__(self, path: str | Path):
         """Open a LoRA model stored in safe tensors.
