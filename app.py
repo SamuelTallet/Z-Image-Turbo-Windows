@@ -21,6 +21,7 @@ from sdnq.loader import apply_sdnq_options_to_model
 from torch import bfloat16, cuda, manual_seed, xpu
 
 from source.py.disclaimer import TERMS_OF_USE, TermsOfUse
+from source.py.ex_prompts import get_example_prompts
 from source.py.gen_history import (
     SEARCHABLE_PROMPTS,
     add_prompt_to_history_frame,
@@ -112,16 +113,6 @@ def get_metadata(filename: str) -> str:
         metadata[filename] = file.read_text()
 
     return metadata[filename]
-
-
-def get_example_prompts() -> list[str]:
-    """Get example prompts."""
-    prompts_file = app_dir / "examples" / "prompts.json"
-
-    with open(prompts_file, "r", encoding="utf-8") as file:
-        prompts = load_json(file)
-
-    return [prompt["text"] for prompt in prompts]
 
 
 def get_theme():
@@ -755,7 +746,9 @@ if __name__ == "__main__":
 
                 gr.Examples(
                     visible=not prompts_history,  # Onboarding-like.
-                    examples=get_example_prompts(),
+                    examples=get_example_prompts(
+                        app_dir / "data" / "example_prompts.json"
+                    ),
                     inputs=prompt,
                     label=t("Example Prompts"),
                 )
