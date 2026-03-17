@@ -1,6 +1,4 @@
-from pathlib import Path
-
-from pydantic import BaseModel, TypeAdapter
+from pydantic import BaseModel
 
 
 class ImageModel(BaseModel):
@@ -20,13 +18,3 @@ class ImageModel(BaseModel):
 
     extra_features: list[str]
     """Extra features supported by this model."""
-
-
-def get_image_models(json_file: Path) -> list[ImageModel]:
-    """Get image models from a JSON file."""
-    adapter = TypeAdapter(list[ImageModel])
-
-    with open(json_file, "r") as file:
-        models_json = file.read()
-
-    return adapter.validate_json(models_json)
