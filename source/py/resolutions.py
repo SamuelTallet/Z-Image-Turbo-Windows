@@ -14,6 +14,7 @@ def get_aspects_and_resolutions() -> tuple:
             default aspect ratio
         )
     """
+    # TODO Move hardcodes to curated_models.json?
     default_aspect_ratio = "16:9"
 
     resolutions_by_aspect = {
@@ -51,7 +52,13 @@ def get_aspects_and_resolutions() -> tuple:
             "1200x1920",
         ],
         "21:9": [
-            "1344x576",
+            "1568x672",
+            "1792x768",
+            "2016x864",
+        ],
+        "9:20": [
+            "720x1600",
+            "864x1920",
         ],
     }
 
