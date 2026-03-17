@@ -7,7 +7,6 @@ from json import load as load_json
 from os import environ
 from pathlib import Path
 from random import randint
-from re import search
 from shutil import rmtree
 from time import time
 
@@ -33,6 +32,7 @@ from source.py.image_model import ImageModel
 from source.py.image_models import get_image_models
 from source.py.lora_model import LoraModel
 from source.py.os_abstract import open_with_default_app
+from source.py.resolutions import get_aspects_and_resolutions, parse_resolution
 from source.py.trigger_word import remove_trigger_word, update_trigger_word
 
 logging.basicConfig(format="%(levelname)s: %(message)s")
@@ -148,85 +148,6 @@ def on_app_load():
             + f" {get_metadata('NAME')}.",
             duration=None,  # Until user closes it.
         )
-
-
-def get_aspects_and_resolutions() -> tuple:
-    """Get aspect ratios and resolutions,
-    possibly translated.
-
-    Returns:
-        Tuple of (
-            resolutions by aspect,
-            default resolution choices,
-            aspect ratio choices,
-            default aspect ratio
-        )
-    """
-    default_aspect_ratio = "16:9"
-
-    resolutions_by_aspect = {
-        "1:1": [
-            "1024x1024",
-            "1280x1280",
-            "1440x1440",
-        ],
-        "16:9": [
-            "1280x720",
-            "1920x1088",
-        ],
-        "9:16": [
-            "720x1280",
-            "1088x1920",
-        ],
-        "4:3": [
-            "1152x864",
-            "1440x1088",
-            "1920x1440",
-        ],
-        "3:4": [
-            "864x1152",
-            "1088x1440",
-            "1440x1920",
-        ],
-        "16:10": [
-            "1280x800",
-            "1440x912",
-            "1920x1200",
-        ],
-        "10:16": [
-            "800x1280",
-            "912x1440",
-            "1200x1920",
-        ],
-        "21:9": [
-            "1344x576",
-        ],
-    }
-
-    default_resolution_choices = resolutions_by_aspect[default_aspect_ratio]
-    aspect_ratio_choices = list(resolutions_by_aspect.keys())
-
-    return (
-        resolutions_by_aspect,
-        default_resolution_choices,
-        aspect_ratio_choices,
-        default_aspect_ratio,
-    )
-
-
-def parse_resolution(resolution):
-    """Parse resolution string into width and height.
-
-    Args:
-        resolution: Resolution string in format "WIDTHxHEIGHT" or "WIDTH×HEIGHT".
-
-    Returns:
-        Tuple of (width, height) as integers. Defaults to (1024, 1024) if parsing fails.
-    """
-    match = search(r"(\d+)\s*[×x]\s*(\d+)", resolution)
-    if match:
-        return int(match.group(1)), int(match.group(2))
-    return 1024, 1024
 
 
 def load_model(model: ImageModel):
@@ -470,27 +391,26 @@ def generate(
 
 
 if __name__ == "__main__":
-    parser = ArgumentParser()
-    parser.add_argument("--port", type=int, required=True)
-    parser.add_argument("--locale", type=str, required=False, default="en-US")
-    args, _ = parser.parse_known_args()
+    arg_parser = ArgumentParser()
+    arg_parser.add_argument("--port", type=int, required=True)
+    arg_parser.add_argument("--locale", type=str, required=False, default="en-US")
+    args, _ = arg_parser.parse_known_args()
 
     models = get_image_models(app_dir / "data" / "curated_models.json")
     # TODO Propose alternatives to Z-Image Turbo.
 
     load_model(models[0])
-
-    if args.locale != "en-US":
-        load_translation(args.locale)
-
-    tou = TermsOfUse(app_dir / ".tou_accepted")
-
     (
         resolutions_by_aspect,
         default_resolution_choices,
         aspect_ratio_choices,
         default_aspect_ratio,
     ) = get_aspects_and_resolutions()
+
+    if args.locale != "en-US":
+        load_translation(args.locale)
+
+    tou = TermsOfUse(app_dir / ".tou_accepted")
 
     with gr.Blocks(
         fill_width=True,

@@ -1,0 +1,89 @@
+"""Resolutions and aspect ratios."""
+
+from re import search
+
+
+def get_aspects_and_resolutions() -> tuple:
+    """Get aspect ratios and resolutions.
+
+    Returns:
+        Tuple of (
+            resolutions by aspect,
+            default resolution choices,
+            aspect ratio choices,
+            default aspect ratio
+        )
+    """
+    default_aspect_ratio = "16:9"
+
+    resolutions_by_aspect = {
+        "1:1": [
+            "1024x1024",
+            "1280x1280",
+            "1440x1440",
+        ],
+        "16:9": [
+            "1280x720",
+            "1920x1088",
+        ],
+        "9:16": [
+            "720x1280",
+            "1088x1920",
+        ],
+        "4:3": [
+            "1152x864",
+            "1440x1088",
+            "1920x1440",
+        ],
+        "3:4": [
+            "864x1152",
+            "1088x1440",
+            "1440x1920",
+        ],
+        "16:10": [
+            "1280x800",
+            "1440x912",
+            "1920x1200",
+        ],
+        "10:16": [
+            "800x1280",
+            "912x1440",
+            "1200x1920",
+        ],
+        "21:9": [
+            "1344x576",
+        ],
+    }
+
+    default_resolution_choices = resolutions_by_aspect[default_aspect_ratio]
+    aspect_ratio_choices = list(resolutions_by_aspect.keys())
+
+    return (
+        resolutions_by_aspect,
+        default_resolution_choices,
+        aspect_ratio_choices,
+        default_aspect_ratio,
+    )
+
+
+def parse_resolution(resolution: str) -> tuple[int, int]:
+    """Parse resolution string into width and height.
+
+    Args:
+        resolution: Resolution string in format "WIDTHxHEIGHT".
+
+    Raises:
+        ValueError: If resolution string is invalid.
+
+    Returns:
+        Tuple of (width, height) as integers.
+    """
+    match = search(r"(?P<width>\d+)\s*x\s*(?P<height>\d+)", resolution)
+
+    if not match or len(match.groups()) != 2:
+        raise ValueError(f"{resolution} isn't in WIDTHxHEIGHT format")
+
+    width = int(match.group("width"))
+    height = int(match.group("height"))
+
+    return width, height
