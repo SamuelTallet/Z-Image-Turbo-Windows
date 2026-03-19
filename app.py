@@ -190,11 +190,12 @@ def load_model(model: ImageModel):
     pipe.enable_model_cpu_offload()
 
 
-def swap_lora(path: str) -> str | None:
+def swap_lora(path: str, image_model: ImageModel) -> str | None:
     """Swap or load a new LoRA model.
 
     Args:
         path: Path to a LoRA file.
+        image_model: Loaded image model.
 
     Returns:
         Trigger word of LoRA model.
@@ -216,9 +217,9 @@ def swap_lora(path: str) -> str | None:
     lora = LoraModel(path)
 
     try:
-        if lora.base_model() != "zimage":
+        if lora.base_model() not in image_model.base_ids:
             gr.Warning(
-                f"{t('This LoRA seems incompatible with')} Z-Image.<br>"
+                f"{t('This LoRA seems incompatible with')} {image_model.family}.<br>"
                 f"{t('It might not work.')}",
                 duration=5,
             )
@@ -590,10 +591,10 @@ if __name__ == "__main__":
                 # - make LoRA row visible,
                 # - remember name of loaded LoRA.
                 lora_path.change(
-                    lambda p, tw: [tw[1], swap_lora(p)],
-                    inputs=[lora_path, trigger_words],
+                    lambda p, tw, m: [tw[1], swap_lora(p, m)],
+                    inputs=[lora_path, trigger_words, model],
                     outputs=trigger_words,
-                    js="(p, tw) => [p.split('|')[0], tw]",
+                    js="(p, tw, m) => [p.split('|')[0], tw, m]",
                 ).then(
                     update_trigger_word,
                     inputs=[trigger_words, prompt],

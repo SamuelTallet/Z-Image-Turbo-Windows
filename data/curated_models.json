@@ -2,7 +2,9 @@
     {
         "id": "Disty0/Z-Image-Turbo-SDNQ-uint4-svd-r32",
         "backup_id": "SamuelTallet/Z-Image-Turbo-SDNQ-uint4-svd-r32",
+        "family": "Z-Image",
         "pipeline": "ZImagePipeline",
+        "base_ids": ["zimage"],
         "extra_features": []
     }
 ]

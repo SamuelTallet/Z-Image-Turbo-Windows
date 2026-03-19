@@ -12,9 +12,18 @@ class ImageModel(BaseModel):
     backup_id: str
     """Backup model ID at Hugging Face."""
 
+    family: str
+    """Family name of this model.
+    Example: Z-Image
+    """
+
     pipeline: str
     """Diffusers pipeline class of this model."""
-    # Value is checked on model load.
+
+    base_ids: list[str]
+    """Known IDs of base image model.
+    Example: zimage
+    """
 
     extra_features: list[str]
     """Extra features supported by this model."""
