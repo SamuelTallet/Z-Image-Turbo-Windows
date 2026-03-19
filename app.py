@@ -306,6 +306,7 @@ def generate_image(
 
 
 def generate(
+    model: ImageModel,
     prompt: str,
     resolution="1024x1024",
     seed=42,
@@ -317,6 +318,7 @@ def generate(
     """Generate an image and possibly a seed, and update gallery.
 
     Args:
+        model: Loaded image model.
         prompt: Text prompt for image generation.
         resolution: Resolution string (e.g. "1024x1024").
         seed: Seed value for reproducibility.
@@ -364,6 +366,7 @@ def generate(
 
     # Prepare metadata to be saved in PNG text chunks.
     image_metadata = PngInfo()
+    image_metadata.add_text("model", model.id)
     image_metadata.add_itxt("prompt", prompt)
     image_metadata.add_text("seed", str(used_seed))
     image_metadata.add_text("steps", str(steps))
@@ -400,6 +403,7 @@ if __name__ == "__main__":
     # TODO Propose alternatives to Z-Image Turbo.
 
     load_model(models[0])
+
     (
         resolutions_by_aspect,
         default_resolution_choices,
@@ -416,6 +420,9 @@ if __name__ == "__main__":
         fill_width=True,
         analytics_enabled=False,
     ) as app:
+        model = gr.State(value=models[0])
+        """Loaded image model."""
+
         with gr.Row(elem_classes=[] if tou.accepted() else ["blurred"]) as ui_row:
             with gr.Column(min_width=48, elem_classes=["sidebar"]):
                 visit_home_btn = gr.Button(
@@ -760,6 +767,7 @@ if __name__ == "__main__":
         generate_btn.click(
             generate,
             inputs=[
+                model,
                 prompt,
                 resolution,
                 seed,
