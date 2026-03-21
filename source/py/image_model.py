@@ -12,8 +12,13 @@ class ImageModel(BaseModel):
     backup_id: str
     """Backup model ID at Hugging Face."""
 
+    name: str
+    """Model name.
+    Example: Z-Image Turbo
+    """
+
     family: str
-    """Family name of this model.
+    """Family of this model.
     Example: Z-Image
     """
 
@@ -25,5 +30,5 @@ class ImageModel(BaseModel):
     Example: zimage
     """
 
-    extra_features: list[str]
-    """Extra features supported by this model."""
+    features: list[str]
+    """Features supported by this model."""
