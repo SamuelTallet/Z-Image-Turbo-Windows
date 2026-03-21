@@ -6,7 +6,7 @@ if /i "%DELETE_UV_CACHE%"=="y" (
     "tools\astral\uv.exe" cache clean >nul 2>&1
 )
 
-set /p DELETE_HF_CACHE="Do you want to drop Hugging Face cache? (y/N) "
+set /p DELETE_HF_CACHE="Do you want to remove Hugging Face cache? (y/N) "
 if /i "%DELETE_HF_CACHE%"=="y" (
     rmdir /s /q "%USERPROFILE%\.cache\huggingface" >nul 2>&1
 )
@@ -14,6 +14,11 @@ if /i "%DELETE_HF_CACHE%"=="y" (
 set /p DELETE_TRITON_CACHE="Do you want to delete Triton cache? (y/N) "
 if /i "%DELETE_TRITON_CACHE%"=="y" (
     rmdir /s /q "%USERPROFILE%\.triton" >nul 2>&1
+)
+
+set /p DELETE_PROMPTS_DB="Do you want to drop prompts history DB? (y/N) "
+if /i "%DELETE_PROMPTS_DB%"=="y" (
+    del /q "%USERPROFILE%\.zpix\prompts_history.sqlite" >nul 2>&1
 )
 
 echo Cleaning now local cache and temp files...
