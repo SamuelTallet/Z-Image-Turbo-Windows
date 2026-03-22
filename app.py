@@ -188,11 +188,7 @@ def load_model(model: ImageModel):
         pipe.text_encoder = apply_sdnq_options_to_model(
             pipe.text_encoder, use_quantized_matmul=True
         )
-        try:
-            pipe.transformer.set_attention_backend("_sage_qk_int8_pv_fp16_triton")
-            pipe_is_optimized = True
-        except Exception as e:
-            logging.warning(f"SageAttention is not available: {e}")
+        pipe_is_optimized = True
 
     pipe.enable_model_cpu_offload()
 

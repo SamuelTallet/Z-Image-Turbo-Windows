@@ -56,10 +56,10 @@ function Install-Package {
     }
 }
 
-function Install-Wheel {
+function Install-Archive {
     param (
         [Parameter(Mandatory = $true)]
-        [string]$Source, # Path to wheel file or URL
+        [string]$Source, # Archive source (URL, etc.)
 
         [Parameter(Mandatory = $true)]
         [string]$Uv # Path to uv executable
@@ -67,7 +67,7 @@ function Install-Wheel {
 
     $uvArgs = @("pip", "install", $Source)
 
-    Write-Debug "Installing wheel from $Source with $Uv $uvArgs"
+    Write-Debug "Installing archive with $Uv $uvArgs"
     & $Uv $uvArgs
 
     if ($LASTEXITCODE -ne 0) {
