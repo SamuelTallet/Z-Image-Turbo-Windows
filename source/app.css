@@ -51,6 +51,10 @@
     display: none;
 }
 
+#reference-images textarea {
+    display: none;
+}
+
 #gallery {
     height: 82vh;
 }

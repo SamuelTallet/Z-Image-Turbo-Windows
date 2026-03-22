@@ -12,6 +12,7 @@ from time import time
 
 import gradio as gr
 from diffusers import Flux2KleinPipeline, ZImagePipeline
+from PIL import Image
 from PIL.PngImagePlugin import PngInfo
 from platformdirs import user_pictures_path
 from sdnq import SDNQConfig  # noqa: F401
@@ -276,47 +277,10 @@ def unload_lora():
         pipe_is_busy = False
 
 
-def generate_image(
-    pipe,
-    prompt,
-    resolution="1024x1024",
-    seed=42,
-    num_inference_steps=8,
-):
-    """Generate an image using pipeline.
-
-    Args:
-        pipe: Loaded pipeline instance.
-        prompt: Text prompt describing the desired image.
-        resolution: Output resolution as "WIDTHxHEIGHT" string.
-        seed: Random seed for reproducible generation.
-        num_inference_steps: Number of denoising steps.
-
-    Returns:
-        Generated PIL Image.
-    """
-    global pipe_is_busy
-    width, height = parse_resolution(resolution)
-
-    try:
-        pipe_is_busy = True
-        image = pipe(
-            prompt=prompt,
-            height=height,
-            width=width,
-            num_inference_steps=num_inference_steps,
-            guidance_scale=0.0,
-            generator=manual_seed(seed),
-        ).images[0]
-    finally:
-        pipe_is_busy = False
-
-    return image
-
-
 def generate(
     model: ImageModel,
     prompt: str,
+    reference_images: dict | None,
     resolution="1024x1024",
     seed=42,
     random_seed=True,
@@ -328,7 +292,8 @@ def generate(
 
     Args:
         model: Loaded image model.
-        prompt: Text prompt for image generation.
+        prompt: Text to guide image generation.
+        reference_images: List of reference images.
         resolution: Resolution string (e.g. "1024x1024").
         seed: Seed value for reproducibility.
         random_seed: Ignore seed argument and generate a seed?
@@ -341,6 +306,8 @@ def generate(
     Raises:
         gr.Error: If the pipeline is not loaded or busy.
     """
+    global pipe_is_busy
+
     if pipe is None:
         raise gr.Error("Pipeline not loaded.")
 
@@ -350,34 +317,41 @@ def generate(
             duration=4,
         )
 
-    if random_seed:
-        used_seed = randint(1, 1000000)
-    else:
-        used_seed = int(seed) if seed != -1 else randint(1, 1000000)
-
-    real_steps = int(steps)
+    width, height = parse_resolution(resolution)
+    used_seed = randint(1, 1000000) if random_seed else int(seed)
 
     # Z-Image Turbo requires one extra step. Cf. Official HF demo.
-    if model.codename == "ZiT":
-        real_steps = real_steps + 1
+    real_steps = int(steps) + (1 if model.codename == "ZiT" else 0)
 
-    generation_args = {
-        "pipe": pipe,
+    pipe_kwargs = {
         "prompt": prompt,
-        "resolution": resolution,
-        "seed": used_seed,
+        "height": height,
+        "width": width,
         "num_inference_steps": real_steps,
+        "guidance_scale": 1.0,  # TODO Expose this in UI?
+        "generator": manual_seed(used_seed),
     }
 
+    if (
+        reference_images
+        and reference_images.get("files")
+        and "image-to-image" in model.features
+    ):
+        images = [Image.open(f) for f in reference_images["files"]]
+        pipe_kwargs["image"] = images
+
     try:
-        image = generate_image(**generation_args)
+        pipe_is_busy = True
+        image = pipe(**pipe_kwargs).images[0]
     except UnicodeDecodeError:
         # A corrupted Triton cache can cause an UnicodeDecodeError.
         rmtree(Path.home() / ".triton", ignore_errors=True)
         gr.Warning(t("Cleared Triton cache as it may be corrupted."), duration=6)
 
         gr.Info(t("Regenerating same image..."), duration=8)
-        image = generate_image(**generation_args)
+        image = pipe(**pipe_kwargs).images[0]
+    finally:
+        pipe_is_busy = False
 
     # Prepare metadata to be saved in PNG text chunks.
     image_metadata = PngInfo()
@@ -532,6 +506,17 @@ if __name__ == "__main__":
                         lines=3,
                         placeholder=t("Enter your prompt here..."),
                         html_attributes=gr.InputHTMLAttributes(spellcheck=False),
+                    )
+
+                with gr.Row():
+                    reference_images = gr.MultimodalTextbox(
+                        label=t("Reference Images"),
+                        sources=["upload"],
+                        file_count="multiple",
+                        file_types=["image"],
+                        max_plain_text_length=0,
+                        submit_btn=False,
+                        elem_id="reference-images",
                     )
 
                 with gr.Row():
@@ -801,6 +786,7 @@ if __name__ == "__main__":
             inputs=[
                 model,
                 prompt,
+                reference_images,
                 resolution,
                 seed,
                 random_seed,

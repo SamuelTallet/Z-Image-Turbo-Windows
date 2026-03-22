@@ -2,12 +2,6 @@ from typing import Literal
 
 from pydantic import BaseModel
 
-ImageModelFeature = Literal[
-    "text-to-image",
-    "image-to-image",
-]
-"""Features that can be supported by an image model."""
-
 
 class ImageModel(BaseModel):
     """An image model."""
@@ -46,7 +40,12 @@ class ImageModel(BaseModel):
     Example: zimage
     """
 
-    features: list[ImageModelFeature]
+    features: list[
+        Literal[
+            "text-to-image",
+            "image-to-image",
+        ]
+    ]
     """Features supported by this model."""
 
     license_url: str
