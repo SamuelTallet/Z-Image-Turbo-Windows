@@ -66,6 +66,9 @@ translation: dict[str, str] = {}
 metadata: dict[str, str] = {}
 """App metadata."""
 
+models: list[ImageModel] = []
+"""Available image models."""
+
 pipe: ZImagePipeline | Flux2KleinPipeline | None = None
 """Pipeline."""
 
@@ -150,7 +153,7 @@ def on_app_load():
         )
 
 
-def load_model(model: ImageModel):
+def load_model(model: ImageModel) -> ImageModel:
     """Load an image model pipeline."""
     global pipe
     global pipe_is_optimized
@@ -191,6 +194,8 @@ def load_model(model: ImageModel):
         pipe_is_optimized = True
 
     pipe.enable_model_cpu_offload()
+
+    return model
 
 
 def swap_lora(path: str, image_model: ImageModel) -> str | None:
@@ -409,29 +414,27 @@ if __name__ == "__main__":
     arg_parser.add_argument("--locale", type=str, required=False, default="en-US")
     args, _ = arg_parser.parse_known_args()
 
-    models = get_image_models(app_dir / "data" / "curated_models.json")
-    # TODO Propose alternatives to Z-Image Turbo.
-
-    load_model(models[0])
-
-    (
-        resolutions_by_aspect,
-        default_resolution_choices,
-        aspect_ratio_choices,
-        default_aspect_ratio,
-    ) = get_aspects_and_resolutions()
-
-    if args.locale != "en-US":
-        load_translation(args.locale)
-
-    tou = TermsOfUse(app_dir / ".tou_accepted")
-
     with gr.Blocks(
         fill_width=True,
         analytics_enabled=False,
     ) as app:
-        model = gr.State(value=models[0])
+        models = get_image_models(app_dir / "data" / "curated_models.json")
+        initial_model = load_model(models[0])
+
+        model = gr.State(value=initial_model)
         """Loaded image model."""
+
+        (
+            resolutions_by_aspect,
+            default_resolution_choices,
+            aspect_ratio_choices,
+            default_aspect_ratio,
+        ) = get_aspects_and_resolutions()
+
+        if args.locale != "en-US":
+            load_translation(args.locale)
+
+        tou = TermsOfUse(app_dir / ".tou_accepted")
 
         with gr.Row(elem_classes=[] if tou.accepted() else ["blurred"]) as ui_row:
             with gr.Column(min_width=48, elem_classes=["sidebar"]):
@@ -513,6 +516,13 @@ if __name__ == "__main__":
                 )
 
             with gr.Column():
+                with gr.Row():
+                    model_select = gr.Dropdown(
+                        label=t("Model"),
+                        choices=[(m.name, m.id) for m in models],
+                        interactive=True,
+                    )
+
                 trigger_words = gr.State(value=[None, None])
                 """Trigger words (previous, current)."""
 
@@ -633,14 +643,25 @@ if __name__ == "__main__":
                     outputs=[show_seed_state, seed_row],
                 )
 
-                with gr.Row(visible=True) as steps_row:
+                with gr.Row(visible=False) as steps_row:
                     steps = gr.Slider(
-                        label=t("Denoising Steps"),
+                        label=t("Inference Steps"),
                         minimum=1,
                         maximum=9,
-                        value=models[0].required_steps,
+                        value=initial_model.required_steps,
                         step=1,
                     )
+
+                model_select.change(
+                    lambda mid: load_model(next(m for m in models if m.id == mid)),
+                    inputs=model_select,
+                    outputs=model,
+                ).then(
+                    # Update steps according to selected model.
+                    lambda m: gr.update(value=m.required_steps),
+                    inputs=model,
+                    outputs=steps,
+                )
 
                 try:
                     prompts_history = get_prompts_history(prompts_history_db)
@@ -731,17 +752,17 @@ if __name__ == "__main__":
                 open_output_folder_btn.click(create_open_output_dir)
 
         with gr.Row():
-            # Add source model link to footer, after Gradio credit.
+            # Add a credits link to footer, after Gradio credit.
             gr.HTML(
                 visible="hidden",
                 js_on_load=f"""
                     document.querySelector("footer").insertAdjacentHTML(
                         "beforeend",
                         `<a
-                            href="https://huggingface.co/{models[0].id}"
+                            href="{get_metadata("HOME_URL")}#credits"
                             target="_blank"
                         >
-                            {t("Source model")} 🤗
+                            {t("See all credits")}
                         </a>`
                     )
                 """,
