@@ -350,12 +350,18 @@ def generate(
     else:
         used_seed = int(seed) if seed != -1 else randint(1, 1000000)
 
+    real_steps = int(steps)
+
+    # Z-Image Turbo requires one extra step. Cf. Official HF demo.
+    if model.codename == "ZiT":
+        real_steps = real_steps + 1
+
     generation_args = {
         "pipe": pipe,
         "prompt": prompt,
         "resolution": resolution,
         "seed": used_seed,
-        "num_inference_steps": int(steps + 1),
+        "num_inference_steps": real_steps,
     }
 
     try:
