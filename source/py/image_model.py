@@ -1,4 +1,12 @@
+from typing import Literal
+
 from pydantic import BaseModel
+
+ImageModelFeature = Literal[
+    "text-to-image",
+    "image-to-image",
+]
+"""Features that can be supported by an image model."""
 
 
 class ImageModel(BaseModel):
@@ -9,7 +17,7 @@ class ImageModel(BaseModel):
     Example: Disty0/Z-Image-Turbo-SDNQ-uint4-svd-r32
     """
 
-    backup_id: str
+    backup_id: str | None
     """Backup model ID at Hugging Face."""
 
     name: str
@@ -25,10 +33,16 @@ class ImageModel(BaseModel):
     pipeline: str
     """Diffusers pipeline class of this model."""
 
+    required_steps: int
+    """Inference steps required for this model."""
+
     base_ids: list[str]
     """Known IDs of base image model.
     Example: zimage
     """
 
-    features: list[str]
+    features: list[ImageModelFeature]
     """Features supported by this model."""
+
+    license_url: str
+    """Link to this model license."""

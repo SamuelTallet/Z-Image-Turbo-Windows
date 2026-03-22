@@ -11,7 +11,7 @@ from shutil import rmtree
 from time import time
 
 import gradio as gr
-from diffusers import ZImagePipeline
+from diffusers import Flux2KleinPipeline, ZImagePipeline
 from PIL.PngImagePlugin import PngInfo
 from platformdirs import user_pictures_path
 from sdnq import SDNQConfig  # noqa: F401
@@ -66,7 +66,7 @@ translation: dict[str, str] = {}
 metadata: dict[str, str] = {}
 """App metadata."""
 
-pipe: ZImagePipeline | None = None
+pipe: ZImagePipeline | Flux2KleinPipeline | None = None
 """Pipeline."""
 
 pipe_is_optimized: bool = False
@@ -158,6 +158,8 @@ def load_model(model: ImageModel):
     match model.pipeline:
         case "ZImagePipeline":
             pipe_class = ZImagePipeline
+        case "Flux2KleinPipeline":
+            pipe_class = Flux2KleinPipeline
         case _:
             raise ValueError(f"Unsupported pipeline class: {model.pipeline}")
 
@@ -167,11 +169,16 @@ def load_model(model: ImageModel):
             torch_dtype=bfloat16,
         )
     except Exception:
-        logging.warning(f"Can't load {model.id}, falling back to {model.backup_id}.")
-        pipe = pipe_class.from_pretrained(
-            model.backup_id,
-            torch_dtype=bfloat16,
-        )
+        if model.backup_id:
+            logging.warning(
+                f"Can't load {model.id}, falling back to {model.backup_id}."
+            )
+            pipe = pipe_class.from_pretrained(
+                model.backup_id,
+                torch_dtype=bfloat16,
+            )
+        else:
+            raise
 
     # Enable INT8 MatMul for AMD, Intel ARC and Nvidia GPUs:
     if triton_is_available and (cuda.is_available() or xpu.is_available()):
@@ -624,12 +631,12 @@ if __name__ == "__main__":
                     outputs=[show_seed_state, seed_row],
                 )
 
-                with gr.Row(visible=False) as steps_row:
+                with gr.Row(visible=True) as steps_row:
                     steps = gr.Slider(
                         label=t("Denoising Steps"),
-                        minimum=4,
+                        minimum=1,
                         maximum=9,
-                        value=8,
+                        value=models[0].required_steps,
                         step=1,
                     )
 

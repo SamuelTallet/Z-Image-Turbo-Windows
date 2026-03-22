@@ -89,7 +89,7 @@ if ($gpu.Vendor -eq "NVIDIA") {
         Install-Package -Id "triton-windows" -Version "3.5.1.post24" -Uv $Uv
         # Since it's a pre-release wheel and it's pretty light (around 11MB), I prefer to bundle it with the app.
         Install-Wheel -Source "wheels\sageattention-2.2.0+cu128torch2.9.0andhigher.post4-cp39-abi3-win_amd64.whl" -Uv $Uv
-        Install-Package -Id "diffusers" -Version "0.36.0" -Uv $Uv
+        Install-Package -Id "diffusers" -Version "0.37.0" -Uv $Uv
         Install-Package -Id "peft" -Version "0.18.1" -Uv $Uv
         Install-Package -Id "sdnq" -Version "0.1.3" -Uv $Uv
         Install-Package -Id "platformdirs" -Version "4.9.2" -Uv $Uv
@@ -110,7 +110,7 @@ else {
     New-VirtualEnv -Python "3.13.11" -Uv $uv
     Write-Host "Trying default setup..."
     Install-Torch -Version "2.9.1" -Backend "auto" -Uv $Uv
-    Install-Package -Id "diffusers" -Version "0.36.0" -Uv $Uv
+    Install-Package -Id "diffusers" -Version "0.37.0" -Uv $Uv
     Install-Package -Id "peft" -Version "0.18.1" -Uv $Uv
     Install-Package -Id "sdnq" -Version "0.1.3" -Uv $Uv
     Install-Package -Id "platformdirs" -Version "4.9.2" -Uv $Uv
