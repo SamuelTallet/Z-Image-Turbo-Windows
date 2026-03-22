@@ -656,6 +656,7 @@ if __name__ == "__main__":
                     lambda mid: load_model(next(m for m in models if m.id == mid)),
                     inputs=model_select,
                     outputs=model,
+                    show_progress_on=model_select,
                 ).then(
                     # Update steps according to selected model.
                     lambda m: gr.update(value=m.required_steps),
