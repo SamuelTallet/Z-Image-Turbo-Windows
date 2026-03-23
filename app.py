@@ -285,6 +285,7 @@ def generate(
     seed=42,
     random_seed=True,
     steps=8,
+    cfg=0.0,
     gallery_images=None,
     lora_name: str | None = None,
 ):
@@ -298,6 +299,7 @@ def generate(
         seed: Seed value for reproducibility.
         random_seed: Ignore seed argument and generate a seed?
         steps: Number of inference (denoising) steps.
+        cfg: Classifier-free guidance scale.
         gallery_images: Existing gallery images to append to.
         lora_name: Name of loaded LoRA (e.g. "Anime_20").
     Returns:
@@ -328,7 +330,7 @@ def generate(
         "height": height,
         "width": width,
         "num_inference_steps": real_steps,
-        "guidance_scale": 1.0,  # TODO Expose this in UI?
+        "guidance_scale": float(cfg),
         "generator": manual_seed(used_seed),
     }
 
@@ -359,6 +361,7 @@ def generate(
     image_metadata.add_itxt("prompt", prompt)
     image_metadata.add_text("seed", str(used_seed))
     image_metadata.add_text("steps", str(steps))
+    image_metadata.add_text("cfg", str(cfg))
 
     image_basename = f"image_{time():.0f}.png"
 
@@ -628,13 +631,20 @@ if __name__ == "__main__":
                     outputs=[show_seed_state, seed_row],
                 )
 
-                with gr.Row(visible=False) as steps_row:
+                with gr.Row(visible=False):
                     steps = gr.Slider(
-                        label=t("Inference Steps"),
+                        label=t("Steps"),
                         minimum=1,
-                        maximum=9,
+                        maximum=50,
                         value=initial_model.default.steps,
                         step=1,
+                    )
+                    cfg = gr.Slider(
+                        label=t("CFG"),
+                        minimum=0.0,
+                        maximum=10.0,
+                        value=initial_model.default.cfg,
+                        step=0.1,
                     )
 
                 model_select.change(
@@ -643,10 +653,13 @@ if __name__ == "__main__":
                     outputs=model,
                     show_progress_on=model_select,
                 ).then(
-                    # Update steps according to selected model.
-                    lambda m: gr.update(value=m.default.steps),
+                    # Update default settings.
+                    lambda m: (
+                        gr.update(value=m.default.steps),
+                        gr.update(value=m.default.cfg),
+                    ),
                     inputs=model,
-                    outputs=steps,
+                    outputs=[steps, cfg],
                 )
 
                 try:
@@ -791,6 +804,7 @@ if __name__ == "__main__":
                 seed,
                 random_seed,
                 steps,
+                cfg,
                 gallery_images,
                 lora_name,
             ],
