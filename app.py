@@ -633,7 +633,7 @@ if __name__ == "__main__":
                         label=t("Inference Steps"),
                         minimum=1,
                         maximum=9,
-                        value=initial_model.required_steps,
+                        value=initial_model.default.steps,
                         step=1,
                     )
 
@@ -644,7 +644,7 @@ if __name__ == "__main__":
                     show_progress_on=model_select,
                 ).then(
                     # Update steps according to selected model.
-                    lambda m: gr.update(value=m.required_steps),
+                    lambda m: gr.update(value=m.default.steps),
                     inputs=model,
                     outputs=steps,
                 )

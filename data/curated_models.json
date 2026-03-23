@@ -6,7 +6,10 @@
         "codename": "ZiT",
         "family": "Z-Image",
         "pipeline": "ZImagePipeline",
-        "required_steps": 8,
+        "default": {
+            "steps": 8,
+            "cfg": 0.0
+        },
         "base_ids": ["zimage"],
         "features": ["text-to-image"],
         "license_url": "https://www.apache.org/licenses/LICENSE-2.0"
@@ -18,7 +21,10 @@
         "codename": null,
         "family": "FLUX.2 [klein]",
         "pipeline": "Flux2KleinPipeline",
-        "required_steps": 4,
+        "default": {
+            "steps": 4,
+            "cfg": 1.0
+        },
         "base_ids": ["flux2_klein_4b"],
         "features": ["text-to-image", "image-to-image"],
         "license_url": "https://www.apache.org/licenses/LICENSE-2.0"
