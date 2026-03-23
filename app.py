@@ -647,13 +647,32 @@ if __name__ == "__main__":
                         step=0.1,
                     )
 
+                # When a new image model is selected:
+                # - unload LoRA model,
+                # - remove trigger word from prompt,
+                # - empty trigger words history,
+                # - make LoRA row invisible,
+                # - forget name of loaded LoRA,
+                # - load selected model,
+                # - update settings according loaded model.
                 model_select.change(
+                    unload_lora,
+                ).then(
+                    remove_trigger_word,
+                    inputs=[trigger_words, prompt],
+                    outputs=[trigger_words, prompt],
+                ).then(
+                    lambda: gr.update(visible=False),
+                    outputs=lora_row,
+                ).then(
+                    lambda: None,
+                    outputs=lora_name,
+                ).then(
                     lambda mid: load_model(next(m for m in models if m.id == mid)),
                     inputs=model_select,
                     outputs=model,
                     show_progress_on=model_select,
-                ).then(
-                    # Update default settings.
+                ).success(
                     lambda m: (
                         gr.update(value=m.default.steps),
                         gr.update(value=m.default.cfg),
