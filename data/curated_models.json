@@ -16,7 +16,7 @@
     },
     {
         "id": "Disty0/FLUX.2-klein-4B-SDNQ-4bit-dynamic",
-        "backup_id": null,
+        "backup_id": "SamuelTallet/FLUX.2-klein-4B-SDNQ-4bit-dynamic",
         "name": "FLUX.2 [klein] 4B",
         "codename": null,
         "family": "FLUX.2 [klein]",
