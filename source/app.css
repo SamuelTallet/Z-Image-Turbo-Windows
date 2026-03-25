@@ -51,6 +51,10 @@
     display: none;
 }
 
+#model-info a {
+    text-decoration: none;
+}
+
 #reference-images textarea {
     display: none;
 }

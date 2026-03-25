@@ -12,7 +12,8 @@
         },
         "base_ids": ["zimage"],
         "features": ["text-to-image"],
-        "license_url": "https://www.apache.org/licenses/LICENSE-2.0"
+        "info": "Excels in photorealism. Commercial use allowed.",
+        "licensing_url": null
     },
     {
         "id": "Disty0/FLUX.2-klein-4B-SDNQ-4bit-dynamic",
@@ -27,6 +28,23 @@
         },
         "base_ids": ["flux2_klein_4b"],
         "features": ["text-to-image", "image-to-image"],
-        "license_url": "https://www.apache.org/licenses/LICENSE-2.0"
+        "info": "Supports image editing. Commercial use allowed.",
+        "licensing_url": null
+    },
+    {
+        "id": "Disty0/FLUX.2-klein-9B-SDNQ-4bit-dynamic-svd-r32",
+        "backup_id": null,
+        "name": "FLUX.2 [klein] 9B",
+        "codename": null,
+        "family": "FLUX.2 [klein]",
+        "pipeline": "Flux2KleinPipeline",
+        "default": {
+            "steps": 4,
+            "cfg": 1.0
+        },
+        "base_ids": ["flux2_klein_9b"],
+        "features": ["text-to-image", "image-to-image"],
+        "info": "Supports image editing. Get a [commercial license]({licensing_url})",
+        "licensing_url": "https://bfl.ai/licensing"
     }
 ]

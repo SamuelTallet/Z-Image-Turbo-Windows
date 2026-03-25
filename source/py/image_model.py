@@ -58,5 +58,9 @@ class ImageModel(BaseModel):
     ]
     """Features supported by this model."""
 
-    license_url: str
-    """Link to this model license."""
+    info: str
+    """Information about this model.
+    Written in Markdown."""
+
+    licensing_url: str | None
+    """Link to get a license for this model."""

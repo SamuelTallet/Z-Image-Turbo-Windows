@@ -30,7 +30,7 @@ from source.py.gen_history import (
     on_prompts_history_row_select,
 )
 from source.py.image_model import ImageModel
-from source.py.image_models import get_image_models
+from source.py.image_models import find_model, get_models
 from source.py.lora_model import LoraModel
 from source.py.os_abstract import open_with_default_app
 from source.py.resolutions import get_aspects_and_resolutions, parse_resolution
@@ -395,7 +395,7 @@ if __name__ == "__main__":
         fill_width=True,
         analytics_enabled=False,
     ) as app:
-        models = get_image_models(app_dir / "data" / "curated_models.json")
+        models = get_models(app_dir / "data" / "curated_models.json")
         initial_model = load_model(models[0])
 
         model = gr.State(value=initial_model)
@@ -492,12 +492,27 @@ if __name__ == "__main__":
                     lambda: open_with_default_app(get_metadata("DONATE_URL")),
                 )
 
+            def get_model_info(model: ImageModel) -> str:
+                return t(model.info).format(licensing_url=model.licensing_url)
+
             with gr.Column():
                 with gr.Row():
                     model_select = gr.Dropdown(
-                        label=t("Model"),
+                        container=False,
                         choices=[(m.name, m.id) for m in models],
-                        interactive=True,
+                        filterable=False,
+                        elem_id="model-select",
+                    )
+                    gr.HTML(
+                        visible="hidden",
+                        js_on_load=f"""
+                            let select = document.getElementById("model-select")
+                            select.title = "{t("Model")}"
+                        """,
+                    )
+                    model_info = gr.Markdown(
+                        get_model_info(initial_model),
+                        elem_id="model-info",
                     )
 
                 trigger_words = gr.State(value=[None, None])
@@ -648,6 +663,7 @@ if __name__ == "__main__":
                     )
 
                 # When a new image model is selected:
+                # - update image model info,
                 # - unload LoRA model,
                 # - remove trigger word from prompt,
                 # - empty trigger words history,
@@ -656,6 +672,10 @@ if __name__ == "__main__":
                 # - load selected model,
                 # - update settings according loaded model.
                 model_select.change(
+                    lambda model_id: get_model_info(find_model(model_id, models)),
+                    inputs=model_select,
+                    outputs=model_info,
+                ).then(
                     unload_lora,
                 ).then(
                     remove_trigger_word,
@@ -668,7 +688,7 @@ if __name__ == "__main__":
                     lambda: None,
                     outputs=lora_name,
                 ).then(
-                    lambda mid: load_model(next(m for m in models if m.id == mid)),
+                    lambda model_id: load_model(find_model(model_id, models)),
                     inputs=model_select,
                     outputs=model,
                     show_progress_on=model_select,
