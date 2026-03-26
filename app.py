@@ -192,7 +192,12 @@ def load_model(model: ImageModel) -> ImageModel:
         pipe.text_encoder = apply_sdnq_options_to_model(
             pipe.text_encoder, use_quantized_matmul=True
         )
-        pipe_is_optimized = True
+        try:
+            pipe.transformer.set_attention_backend("flash")
+            pipe_is_optimized = True
+        except Exception as e:
+            pipe.transformer.reset_attention_backend()
+            logging.warning(f"FlashAttention is not available: {e}")
 
     pipe.enable_model_cpu_offload()
 

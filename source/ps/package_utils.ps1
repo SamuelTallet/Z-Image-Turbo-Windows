@@ -7,7 +7,7 @@ function Install-Torch {
         [string]$Backend, # Backend. Example: auto
 
         [Parameter(Mandatory = $false)]
-        [string]$IndexUrl, # Default index URL. Example: cu128
+        [string]$IndexUrl, # Default index URL. Example: cu130
 
         [Parameter(Mandatory = $true)]
         [string]$Uv # Path to uv executable

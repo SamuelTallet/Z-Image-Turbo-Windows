@@ -85,12 +85,13 @@ if ($gpu.Vendor -eq "NVIDIA") {
     New-VirtualEnv -Python "3.13.11" -Uv $uv
     try {
         Write-Host "Trying optimized setup for your NVIDIA GPU..."
-        Install-Torch -Version "2.9.1+cu128" -IndexUrl "cu128" -Uv $Uv
-        Install-Package -Id "triton-windows" -Version "3.5.1.post24" -Uv $Uv
-        Install-Archive -Source "diffusers @ https://github.com/huggingface/diffusers/archive/8d0f3e1ba8029bfe3b1c4127d5ed9e26617d31f3.zip" -Uv $Uv
+        Install-Torch -Version "2.10.0+cu130" -IndexUrl "cu130" -Uv $Uv
+        Install-Package -Id "triton-windows" -Version "3.6.0.post26" -Uv $Uv
+        Install-Archive -Source "https://github.com/mjun0812/flash-attention-prebuild-wheels/releases/download/v0.7.13/flash_attn-2.8.3+cu130torch2.10-cp313-cp313-win_amd64.whl" -Uv $Uv
+        Install-Archive -Source "diffusers @ https://github.com/huggingface/diffusers/archive/b757035df6fe080b56a672c4000e458bb442821a.zip" -Uv $Uv
         Install-Package -Id "peft" -Version "0.18.1" -Uv $Uv
-        Install-Package -Id "sdnq" -Version "0.1.3" -Uv $Uv
-        Install-Package -Id "platformdirs" -Version "4.9.2" -Uv $Uv
+        Install-Package -Id "sdnq" -Version "0.1.6" -Uv $Uv
+        Install-Package -Id "platformdirs" -Version "4.9.4" -Uv $Uv
         Install-Package -Id "gradio" -Version "6.2.0" -Uv $Uv
         $optimized = $true
     }
@@ -107,11 +108,11 @@ else {
     # This marker is removed by `uv venv --clear`, that's consistent.
     New-VirtualEnv -Python "3.13.11" -Uv $uv
     Write-Host "Trying default setup..."
-    Install-Torch -Version "2.9.1" -Backend "auto" -Uv $Uv
-    Install-Archive -Source "diffusers @ https://github.com/huggingface/diffusers/archive/8d0f3e1ba8029bfe3b1c4127d5ed9e26617d31f3.zip" -Uv $Uv
+    Install-Torch -Version "2.10.0" -Backend "auto" -Uv $Uv
+    Install-Archive -Source "diffusers @ https://github.com/huggingface/diffusers/archive/b757035df6fe080b56a672c4000e458bb442821a.zip" -Uv $Uv
     Install-Package -Id "peft" -Version "0.18.1" -Uv $Uv
-    Install-Package -Id "sdnq" -Version "0.1.3" -Uv $Uv
-    Install-Package -Id "platformdirs" -Version "4.9.2" -Uv $Uv
+    Install-Package -Id "sdnq" -Version "0.1.6" -Uv $Uv
+    Install-Package -Id "platformdirs" -Version "4.9.4" -Uv $Uv
     Install-Package -Id "gradio" -Version "6.2.0" -Uv $Uv
 }
 
