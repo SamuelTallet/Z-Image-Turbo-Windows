@@ -29,6 +29,11 @@ class ImageModel(BaseModel):
     Example: Z-Image Turbo
     """
 
+    label: str
+    """Model label including important information.
+    Example: Klein 4B - Image edits
+    """
+
     codename: str | None
     """Model codename.
     Example: ZiT
@@ -57,10 +62,3 @@ class ImageModel(BaseModel):
         ]
     ]
     """Features supported by this model."""
-
-    info: str
-    """Information about this model.
-    Written in Markdown."""
-
-    licensing_url: str | None
-    """Link to get a license for this model."""

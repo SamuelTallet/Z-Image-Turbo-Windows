@@ -3,6 +3,7 @@
         "id": "Disty0/Z-Image-Turbo-SDNQ-uint4-svd-r32",
         "backup_id": "SamuelTallet/Z-Image-Turbo-SDNQ-uint4-svd-r32",
         "name": "Z-Image Turbo",
+        "label": "Z-Image Turbo",
         "codename": "ZiT",
         "family": "Z-Image",
         "pipeline": "ZImagePipeline",
@@ -11,14 +12,13 @@
             "cfg": 0.0
         },
         "base_ids": ["zimage"],
-        "features": ["text-to-image"],
-        "info": "Excels in photorealism. Commercial use allowed.",
-        "licensing_url": null
+        "features": ["text-to-image"]
     },
     {
         "id": "Disty0/FLUX.2-klein-4B-SDNQ-4bit-dynamic",
         "backup_id": "SamuelTallet/FLUX.2-klein-4B-SDNQ-4bit-dynamic",
         "name": "FLUX.2 [klein] 4B",
+        "label": "Klein 4B - Image edits",
         "codename": null,
         "family": "FLUX.2 [klein]",
         "pipeline": "Flux2KleinPipeline",
@@ -27,14 +27,13 @@
             "cfg": 1.0
         },
         "base_ids": ["flux2_klein_4b"],
-        "features": ["text-to-image", "image-to-image"],
-        "info": "Supports image editing. Commercial use allowed.",
-        "licensing_url": null
+        "features": ["text-to-image", "image-to-image"]
     },
     {
         "id": "Disty0/FLUX.2-klein-9B-SDNQ-4bit-dynamic-svd-r32",
         "backup_id": null,
         "name": "FLUX.2 [klein] 9B",
+        "label": "Klein 9B - Image edits - Non commercial license",
         "codename": null,
         "family": "FLUX.2 [klein]",
         "pipeline": "Flux2KleinPipeline",
@@ -43,8 +42,6 @@
             "cfg": 1.0
         },
         "base_ids": ["flux2_klein_9b"],
-        "features": ["text-to-image", "image-to-image"],
-        "info": "Supports image editing. Get a [commercial license]({licensing_url})",
-        "licensing_url": "https://bfl.ai/licensing"
+        "features": ["text-to-image", "image-to-image"]
     }
 ]

@@ -497,14 +497,11 @@ if __name__ == "__main__":
                     lambda: open_with_default_app(get_metadata("DONATE_URL")),
                 )
 
-            def get_model_info(model: ImageModel) -> str:
-                return t(model.info).format(licensing_url=model.licensing_url)
-
             with gr.Column():
                 with gr.Row():
                     model_select = gr.Dropdown(
                         container=False,
-                        choices=[(m.name, m.id) for m in models],
+                        choices=[(t(m.label), m.id) for m in models],
                         filterable=False,
                         elem_id="model-select",
                     )
@@ -514,10 +511,6 @@ if __name__ == "__main__":
                             let select = document.getElementById("model-select")
                             select.title = "{t("Model")}"
                         """,
-                    )
-                    model_info = gr.Markdown(
-                        get_model_info(initial_model),
-                        elem_id="model-info",
                     )
 
                 trigger_words = gr.State(value=[None, None])
@@ -668,7 +661,6 @@ if __name__ == "__main__":
                     )
 
                 # When a new image model is selected:
-                # - update image model info,
                 # - unload LoRA model,
                 # - remove trigger word from prompt,
                 # - empty trigger words history,
@@ -677,10 +669,6 @@ if __name__ == "__main__":
                 # - load selected model,
                 # - update settings according loaded model.
                 model_select.change(
-                    lambda model_id: get_model_info(find_model(model_id, models)),
-                    inputs=model_select,
-                    outputs=model_info,
-                ).then(
                     unload_lora,
                 ).then(
                     remove_trigger_word,
