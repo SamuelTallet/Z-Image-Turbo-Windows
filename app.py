@@ -500,17 +500,9 @@ if __name__ == "__main__":
             with gr.Column():
                 with gr.Row():
                     model_select = gr.Dropdown(
-                        container=False,
+                        label=t("Model"),
                         choices=[(t(m.label), m.id) for m in models],
                         filterable=False,
-                        elem_id="model-select",
-                    )
-                    gr.HTML(
-                        visible="hidden",
-                        js_on_load=f"""
-                            let select = document.getElementById("model-select")
-                            select.title = "{t("Model")}"
-                        """,
                     )
 
                 trigger_words = gr.State(value=[None, None])
