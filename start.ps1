@@ -92,7 +92,7 @@ if ($gpu.Vendor -eq "NVIDIA") {
         Install-Package -Id "peft" -Version "0.18.1" -Uv $Uv
         Install-Package -Id "sdnq" -Version "0.1.6" -Uv $Uv
         Install-Package -Id "platformdirs" -Version "4.9.4" -Uv $Uv
-        Install-Package -Id "gradio" -Version "6.2.0" -Uv $Uv
+        Install-Package -Id "gradio" -Version "6.10.0" -Uv $Uv
         $optimized = $true
     }
     catch {
@@ -113,7 +113,7 @@ else {
     Install-Package -Id "peft" -Version "0.18.1" -Uv $Uv
     Install-Package -Id "sdnq" -Version "0.1.6" -Uv $Uv
     Install-Package -Id "platformdirs" -Version "4.9.4" -Uv $Uv
-    Install-Package -Id "gradio" -Version "6.2.0" -Uv $Uv
+    Install-Package -Id "gradio" -Version "6.10.0" -Uv $Uv
 }
 
 Write-Host "Installation complete." -ForegroundColor Green
