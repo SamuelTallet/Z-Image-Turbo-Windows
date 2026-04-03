@@ -1,17 +1,23 @@
 """Trigger word helpers."""
 
+import gradio as gr
 
-def update_trigger_word(trigger_words: list, prompt: str) -> str:
+
+def update_trigger_word(trigger_words: list, mm_prompt: dict | None) -> str:
     """Update the trigger word in the prompt.
 
     Args:
         trigger_words: List of [previous, current] trigger words.
-        prompt: The current prompt as a string.
+        mm_prompt: Multimodal dictionary containing the prompt.
 
     Returns:
-        Updated prompt.
+        Updated prompt if provided.
     """
+    if not mm_prompt or not mm_prompt.get("text"):
+        return gr.skip()
+
     previous_tw, current_tw = trigger_words
+    prompt: str = mm_prompt["text"]
 
     # Removes the previous trigger word from start of the prompt.
     if previous_tw and prompt.startswith(previous_tw):
@@ -24,17 +30,22 @@ def update_trigger_word(trigger_words: list, prompt: str) -> str:
     return prompt
 
 
-def remove_trigger_word(trigger_words: list, prompt: str) -> tuple:
+def remove_trigger_word(trigger_words: list, mm_prompt: dict | None) -> tuple:
     """Remove the current trigger word from the prompt.
 
     Args:
         trigger_words: List of [previous, current] trigger words.
-        prompt: The current prompt as a string.
+        mm_prompt: Multimodal dictionary containing the prompt.
 
     Returns:
-        Tuple of (empty trigger words list, updated prompt).
+        Tuple of (empty trigger words list, updated prompt if provided).
     """
+    if not mm_prompt or not mm_prompt.get("text"):
+        return [None, None], gr.skip()
+
     _, current_tw = trigger_words
+
+    prompt: str = mm_prompt["text"]
 
     # Removes the current trigger word from start of the prompt.
     if current_tw and prompt.startswith(current_tw):

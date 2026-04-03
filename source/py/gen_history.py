@@ -84,37 +84,40 @@ def get_prompts_history(sqlite_file: Path) -> list[str]:
     return prompts
 
 
-def add_prompt_to_history_frame(candidate_prompt: str, history: list[list[str]]):
+def add_prompt_to_history_frame(mm_prompt: dict | None, history: list[list[str]]):
     """Add a new entry to prompts history frame
     and ensure this frame is visible.
 
     Args:
-        candidate_prompt: Prompt we want to prepend to history frame.
+        mm_prompt: Multimodal dictionary containing the prompt.
         history: Current prompts history.
 
     Returns:
-        Updated history frame value and visibility.
+        Updated history frame value and visibility, if new prompt provided.
     """
-    new_prompt = candidate_prompt.strip()
-
-    if not new_prompt or [new_prompt] in history:
+    if not mm_prompt or not mm_prompt.get("text"):
         return gr.skip()
 
-    history.insert(0, [new_prompt])
+    prompt: str = mm_prompt["text"]
+
+    if [prompt] in history:
+        return gr.skip()
+
+    history.insert(0, [prompt])
     return gr.update(value=history, visible=True)
 
 
-def insert_prompt_in_history_db(candidate_prompt: str, sqlite_file: Path):
+def insert_prompt_in_history_db(mm_prompt: dict | None, sqlite_file: Path):
     """Insert a new prompt into dedicated history database.
 
     Args:
-        candidate_prompt: Prompt we want to insert into history database.
+        mm_prompt: Multimodal dictionary containing the prompt.
         sqlite_file: Path to prompts history SQLite database.
     """
-    new_prompt = candidate_prompt.strip()
-
-    if not new_prompt:
+    if not mm_prompt or not mm_prompt.get("text"):
         return
+
+    prompt: str = mm_prompt["text"]
 
     sqlite_connection = _open_prompts_history_db(sqlite_file)
     sqlite_cursor = sqlite_connection.cursor()
@@ -127,7 +130,7 @@ def insert_prompt_in_history_db(candidate_prompt: str, sqlite_file: Path):
         VALUES (?)
         ON CONFLICT (prompt) DO NOTHING;
         """,
-        (new_prompt,),
+        (prompt,),
     )
 
     sqlite_connection.commit()

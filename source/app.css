@@ -51,8 +51,14 @@
     display: none;
 }
 
-#model-info a {
-    text-decoration: none;
+#prompt .upload-button {
+    display: none;
+}
+
+#prompt textarea {
+    overflow-y: hidden !important;
+    height: auto !important;
+    field-sizing: content;
 }
 
 #reference-images textarea {

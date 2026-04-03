@@ -33,6 +33,7 @@ from source.py.image_model import ImageModel
 from source.py.image_models import find_model, get_models
 from source.py.lora_model import LoraModel
 from source.py.os_abstract import open_with_default_app
+from source.py.prompt_extract import extract_update_prompt
 from source.py.resolutions import get_aspects_and_resolutions, parse_resolution
 from source.py.trigger_word import remove_trigger_word, update_trigger_word
 
@@ -284,7 +285,7 @@ def unload_lora():
 
 def generate(
     model: ImageModel,
-    prompt: str,
+    mm_prompt: dict | None,
     reference_images: dict | None,
     resolution="1024x1024",
     seed=42,
@@ -298,7 +299,7 @@ def generate(
 
     Args:
         model: Loaded image model.
-        prompt: Text to guide image generation.
+        mm_prompt: Multimodal dictionary containing the prompt.
         reference_images: List of reference images.
         resolution: Resolution string (e.g. "1024x1024").
         seed: Seed value for reproducibility.
@@ -323,6 +324,11 @@ def generate(
             t("Pipeline is busy. Please try again shortly."),
             duration=4,
         )
+
+    prompt: str = ""
+
+    if mm_prompt and mm_prompt.get("text"):
+        prompt = mm_prompt["text"]
 
     width, height = parse_resolution(resolution)
     used_seed = randint(1, 1000000) if random_seed else int(seed)
@@ -509,11 +515,28 @@ if __name__ == "__main__":
                 """Trigger words (previous, current)."""
 
                 with gr.Row():
-                    prompt = gr.Textbox(
+                    mm_prompt = gr.MultimodalTextbox(
                         label=t("Prompt"),
                         lines=3,
+                        max_plain_text_length=3000,
                         placeholder=t("Enter your prompt here..."),
                         html_attributes=gr.InputHTMLAttributes(spellcheck=False),
+                        file_types=["image"],
+                        submit_btn=False,
+                        elem_id="prompt",
+                    )
+                    gr.HTML(
+                        visible="hidden",
+                        js_on_load=f"""
+                            let textbox = document.getElementById("prompt")
+                            textbox.title = "{t("Drag an image to recover its prompt")}"
+                        """,
+                    )
+                    mm_prompt.change(
+                        extract_update_prompt,
+                        inputs=mm_prompt,
+                        outputs=mm_prompt,
+                        show_progress="hidden",
                     )
 
                 with gr.Row():
@@ -584,8 +607,8 @@ if __name__ == "__main__":
                         unload_lora,
                     ).then(
                         remove_trigger_word,
-                        inputs=[trigger_words, prompt],
-                        outputs=[trigger_words, prompt],
+                        inputs=[trigger_words, mm_prompt],
+                        outputs=[trigger_words, mm_prompt],
                     ).then(
                         lambda: gr.update(visible=False),
                         outputs=lora_row,
@@ -609,8 +632,8 @@ if __name__ == "__main__":
                     js="(p, tw, m) => [p.split('|')[0], tw, m]",
                 ).then(
                     update_trigger_word,
-                    inputs=[trigger_words, prompt],
-                    outputs=prompt,
+                    inputs=[trigger_words, mm_prompt],
+                    outputs=mm_prompt,
                 ).then(
                     lambda: gr.update(visible=True),
                     outputs=lora_row,
@@ -664,8 +687,8 @@ if __name__ == "__main__":
                     unload_lora,
                 ).then(
                     remove_trigger_word,
-                    inputs=[trigger_words, prompt],
-                    outputs=[trigger_words, prompt],
+                    inputs=[trigger_words, mm_prompt],
+                    outputs=[trigger_words, mm_prompt],
                 ).then(
                     lambda: gr.update(visible=False),
                     outputs=lora_row,
@@ -706,7 +729,7 @@ if __name__ == "__main__":
                 )
                 prompts_history_frame.select(
                     on_prompts_history_row_select,
-                    outputs=prompt,
+                    outputs=mm_prompt,
                     show_progress="hidden",
                 ).then(
                     # Force fullscreen exit.
@@ -730,7 +753,7 @@ if __name__ == "__main__":
                     examples=get_example_prompts(
                         app_dir / "data" / "example_prompts.json"
                     ),
-                    inputs=prompt,
+                    inputs=mm_prompt,
                     label=t("Example Prompts"),
                 )
 
@@ -822,7 +845,7 @@ if __name__ == "__main__":
             generate,
             inputs=[
                 model,
-                prompt,
+                mm_prompt,
                 reference_images,
                 resolution,
                 seed,
@@ -841,11 +864,11 @@ if __name__ == "__main__":
             outputs=gallery_images,
         ).then(
             add_prompt_to_history_frame,
-            inputs=[prompt, prompts_history_frame],
+            inputs=[mm_prompt, prompts_history_frame],
             outputs=[prompts_history_frame],
         ).then(
             lambda p: insert_prompt_in_history_db(p, prompts_history_db),
-            inputs=prompt,
+            inputs=mm_prompt,
         )
 
         app.load(on_app_load)
