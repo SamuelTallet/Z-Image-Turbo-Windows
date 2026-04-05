@@ -3,7 +3,7 @@
 from logging import warning
 from pathlib import Path
 
-TERMS_OF_USE = "By using this application to create images, I engage to respect copyright and person's image right, and not mislead others. In a commercial context, I will only use models I have a commercial license for."
+TERMS_OF_USE = "By using this application to create images, I engage to respect copyright and person's image right, and not mislead others."
 """Terms of Use text."""
 
 

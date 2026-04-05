@@ -507,7 +507,7 @@ if __name__ == "__main__":
                 with gr.Row():
                     model_select = gr.Dropdown(
                         label=t("Model"),
-                        choices=[(t(m.label), m.id) for m in models],
+                        choices=[(t(m.name), m.id) for m in models],
                         filterable=False,
                         elem_id="model-select",
                     )

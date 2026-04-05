@@ -29,11 +29,6 @@ class ImageModel(BaseModel):
     Example: Z-Image Turbo
     """
 
-    label: str
-    """Model label including important information.
-    Example: Klein 4B - Image edits
-    """
-
     codename: str | None
     """Model codename.
     Example: ZiT
