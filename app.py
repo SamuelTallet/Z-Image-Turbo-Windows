@@ -509,6 +509,14 @@ if __name__ == "__main__":
                         label=t("Model"),
                         choices=[(t(m.label), m.id) for m in models],
                         filterable=False,
+                        elem_id="model-select",
+                    )
+                    gr.HTML(
+                        visible="hidden",
+                        js_on_load=f"""
+                            let select = document.getElementById("model-select")
+                            select.title = "{t("To edit photos, select Klein 4B")}"
+                        """,
                     )
 
                 trigger_words = gr.State(value=[None, None])
@@ -528,8 +536,8 @@ if __name__ == "__main__":
                     gr.HTML(
                         visible="hidden",
                         js_on_load=f"""
-                            let textbox = document.getElementById("prompt")
-                            textbox.title = "{t("Drag an image to recover its prompt")}"
+                            let zone = document.getElementById("prompt")
+                            zone.title = "{t("Drag an image here to recover its prompt")}"
                         """,
                     )
                     mm_prompt.change(
@@ -548,6 +556,13 @@ if __name__ == "__main__":
                         max_plain_text_length=0,
                         submit_btn=False,
                         elem_id="reference-images",
+                    )
+                    gr.HTML(
+                        visible="hidden",
+                        js_on_load=f"""
+                            let zone = document.getElementById("reference-images")
+                            zone.title = "{t("Drag an image here to add it as a reference")}"
+                        """,
                     )
 
                 with gr.Row():
