@@ -83,6 +83,10 @@
     height: var(--size-32);
 }
 
+#reference-images .thumbnail-image {
+    object-fit: contain;
+}
+
 #examples p {
     font-size: var(--text-md);
     display: -webkit-box;
