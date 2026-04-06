@@ -205,6 +205,17 @@ def load_model(model: ImageModel) -> ImageModel:
     return model
 
 
+def swap_model(model: ImageModel) -> ImageModel:
+    """Swap an image model pipeline."""
+    global pipe_is_busy
+
+    pipe_is_busy = True
+    try:
+        return load_model(model)
+    finally:
+        pipe_is_busy = False
+
+
 def swap_lora(path: str, image_model: ImageModel) -> str | None:
     """Swap or load a new LoRA model.
 
@@ -623,7 +634,13 @@ if __name__ == "__main__":
                     # - make LoRA row invisible,
                     # - forget name of loaded LoRA.
                     unload_lora_btn.click(
+                        lambda: gr.update(interactive=False),
+                        outputs=model_select,
+                    ).then(
                         unload_lora,
+                    ).then(
+                        lambda: gr.update(interactive=True),
+                        outputs=model_select,
                     ).then(
                         remove_trigger_word,
                         inputs=[trigger_words, mm_prompt],
@@ -645,10 +662,16 @@ if __name__ == "__main__":
                 # - make LoRA row visible,
                 # - remember name of loaded LoRA.
                 lora_path.change(
+                    lambda: gr.update(interactive=False),
+                    outputs=model_select,
+                ).then(
                     lambda p, tw, m: [tw[1], swap_lora(p, m)],
                     inputs=[lora_path, trigger_words, model],
                     outputs=trigger_words,
                     js="(p, tw, m) => [p.split('|')[0], tw, m]",
+                ).then(
+                    lambda: gr.update(interactive=True),
+                    outputs=model_select,
                 ).then(
                     update_trigger_word,
                     inputs=[trigger_words, mm_prompt],
@@ -703,6 +726,9 @@ if __name__ == "__main__":
                 # - load selected model,
                 # - update settings according loaded model.
                 model_select.change(
+                    lambda: gr.update(interactive=False),
+                    outputs=model_select,
+                ).then(
                     unload_lora,
                 ).then(
                     remove_trigger_word,
@@ -715,7 +741,7 @@ if __name__ == "__main__":
                     lambda: None,
                     outputs=lora_name,
                 ).then(
-                    lambda model_id: load_model(find_model(model_id, models)),
+                    lambda model_id: swap_model(find_model(model_id, models)),
                     inputs=model_select,
                     outputs=model,
                     show_progress_on=model_select,
@@ -726,6 +752,9 @@ if __name__ == "__main__":
                     ),
                     inputs=model,
                     outputs=[steps, cfg],
+                ).then(
+                    lambda: gr.update(interactive=True),
+                    outputs=model_select,
                 )
 
                 try:
@@ -862,6 +891,9 @@ if __name__ == "__main__":
         )
 
         generate_btn.click(
+            lambda: gr.update(interactive=False),
+            outputs=model_select,
+        ).then(
             generate,
             inputs=[
                 model,
@@ -877,6 +909,9 @@ if __name__ == "__main__":
             ],
             outputs=[gallery_images, last_image_index, seed],
             show_progress_on=gallery_images,
+        ).then(
+            lambda: gr.update(interactive=True),
+            outputs=model_select,
         ).then(
             # Select generated image in gallery:
             lambda idx: gr.update(selected_index=idx),
