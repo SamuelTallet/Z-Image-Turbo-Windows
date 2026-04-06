@@ -345,13 +345,17 @@ def generate(
         "generator": manual_seed(used_seed),
     }
 
-    if (
-        reference_images
-        and reference_images.get("files")
-        and "image-to-image" in model.features
-    ):
-        images = [Image.open(f) for f in reference_images["files"]]
-        pipe_kwargs["image"] = images
+    if reference_images and reference_images.get("files"):
+        if "image-to-image" in model.features:
+            images = [Image.open(f) for f in reference_images["files"]]
+            pipe_kwargs["image"] = images
+        else:
+            gr.Warning(
+                t(
+                    "Reference images were ignored. Please select another model, such as [klein] 4B, to account them."
+                ),
+                duration=12,
+            )
 
     try:
         pipe_is_busy = True
@@ -515,7 +519,7 @@ if __name__ == "__main__":
                         visible="hidden",
                         js_on_load=f"""
                             let select = document.getElementById("model-select")
-                            select.title = "{t("To edit photos, select Klein 4B")}"
+                            select.title = "{t("To edit photos, select [klein] 4B")}"
                         """,
                     )
 
@@ -763,13 +767,14 @@ if __name__ == "__main__":
                     """
                 )
 
-                gr.Examples(
+                examples = gr.Examples(
                     visible=not prompts_history,  # Onboarding-like.
                     examples=get_example_prompts(
                         app_dir / "data" / "example_prompts.json"
                     ),
                     inputs=mm_prompt,
                     label=t("Example Prompts"),
+                    elem_id="examples",
                 )
 
             with gr.Column(scale=2):

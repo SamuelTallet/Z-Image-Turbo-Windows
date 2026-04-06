@@ -65,6 +65,33 @@
     display: none;
 }
 
+#reference-images .upload-button svg {
+    display: none;
+}
+
+#reference-images .upload-button {
+    min-height: var(--size-9);
+    height: stretch; /* Adapt to thumbnail height */
+    background-image: url("/gradio_api/file=assets/gray_plus.svg");
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+#reference-images .thumbnail-item {
+    width: var(--size-32);
+    height: var(--size-32);
+}
+
+#examples p {
+    font-size: var(--text-md);
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    overflow: hidden;
+}
+
 #gallery {
     height: 82vh;
 }
