@@ -1,7 +1,9 @@
 """Image models management."""
 
+from logging import warning
 from pathlib import Path
 
+from huggingface_hub import snapshot_download
 from pydantic import TypeAdapter
 
 from .image_model import ImageModel
@@ -20,3 +22,16 @@ def find_model(model_id: str, models: list[ImageModel]) -> ImageModel:
     Raises: StopIteration if not found.
     """
     return next(m for m in models if m.id == model_id)
+
+
+def download_model(model: ImageModel) -> None:
+    """Download an image model."""
+
+    try:
+        snapshot_download(model.id)
+    except Exception:
+        if model.backup_id:
+            warning(f"Can't download {model.id}, falling back to {model.backup_id}.")
+            snapshot_download(model.backup_id)
+        else:
+            raise

@@ -13,6 +13,7 @@ from time import time
 import gradio as gr
 from diffusers import Flux2KleinPipeline, ZImagePipeline
 from PIL import Image
+from PIL.ImageShow import show
 from PIL.PngImagePlugin import PngInfo
 from platformdirs import user_pictures_path
 from sdnq import SDNQConfig  # noqa: F401
@@ -30,7 +31,7 @@ from source.py.gen_history import (
     on_prompts_history_row_select,
 )
 from source.py.image_model import ImageModel
-from source.py.image_models import find_model, get_models
+from source.py.image_models import download_model, find_model, get_models
 from source.py.lora_model import LoraModel
 from source.py.os_abstract import open_with_default_app
 from source.py.prompt_extract import extract_update_prompt
@@ -521,8 +522,10 @@ if __name__ == "__main__":
             with gr.Column():
                 with gr.Row():
                     model_select = gr.Dropdown(
-                        label=t("Model"),
+                        container=False,
+                        scale=2,
                         choices=[(t(m.name), m.id) for m in models],
+                        value=initial_model.id,
                         filterable=False,
                         elem_id="model-select",
                     )
@@ -533,6 +536,7 @@ if __name__ == "__main__":
                             select.title = "{t("To edit photos, select [klein] 4B")}"
                         """,
                     )
+                    model_status = gr.HTML(t("Model is ready"))
 
                 trigger_words = gr.State(value=[None, None])
                 """Trigger words (previous, current)."""
@@ -718,43 +722,90 @@ if __name__ == "__main__":
                     )
 
                 # When a new image model is selected:
+                # - lock model dropdown,
                 # - unload LoRA model,
                 # - remove trigger word from prompt,
                 # - empty trigger words history,
                 # - make LoRA row invisible,
                 # - forget name of loaded LoRA,
-                # - load selected model,
-                # - update settings according loaded model.
-                model_select.change(
-                    lambda: gr.update(interactive=False),
+                # - download selected model...
+                model_download = (
+                    model_select.change(
+                        lambda: gr.update(interactive=False),
+                        outputs=model_select,
+                        show_progress="hidden",
+                    )
+                    .then(unload_lora)
+                    .then(
+                        remove_trigger_word,
+                        inputs=[trigger_words, mm_prompt],
+                        outputs=[trigger_words, mm_prompt],
+                    )
+                    .then(
+                        lambda: gr.update(visible=False),
+                        outputs=lora_row,
+                    )
+                    .then(
+                        lambda: None,
+                        outputs=lora_name,
+                    )
+                    .then(
+                        lambda: gr.update(value=t("Downloading...")),
+                        outputs=model_status,
+                        show_progress="hidden",
+                    )
+                    .then(
+                        lambda model_id: download_model(find_model(model_id, models)),
+                        inputs=model_select,
+                        show_progress="hidden",
+                    )
+                )
+
+                # On model download failure:
+                # - reselect initial model,
+                # - release model dropdown.
+                model_download.failure(
+                    lambda: gr.update(value=t("Download failed")),
+                    outputs=model_status,
+                ).then(
+                    lambda: gr.update(
+                        value=initial_model.id,
+                        interactive=True,
+                    ),
                     outputs=model_select,
-                ).then(
-                    unload_lora,
-                ).then(
-                    remove_trigger_word,
-                    inputs=[trigger_words, mm_prompt],
-                    outputs=[trigger_words, mm_prompt],
-                ).then(
-                    lambda: gr.update(visible=False),
-                    outputs=lora_row,
-                ).then(
-                    lambda: None,
-                    outputs=lora_name,
+                )
+
+                # On model download success: load model...
+                model_load = model_download.success(
+                    lambda: gr.update(value=t("Loading...")),
+                    outputs=model_status,
+                    show_progress="hidden",
                 ).then(
                     lambda model_id: swap_model(find_model(model_id, models)),
                     inputs=model_select,
                     outputs=model,
-                    show_progress_on=model_select,
-                ).success(
-                    lambda m: (
-                        gr.update(value=m.default.steps),
-                        gr.update(value=m.default.cfg),
+                    show_progress="hidden",
+                )
+
+                # On model load success:
+                # - update settings according to model,
+                # - release model dropdown.
+                model_load.success(
+                    lambda image_model: (
+                        gr.update(value=image_model.default.steps),
+                        gr.update(value=image_model.default.cfg),
                     ),
                     inputs=model,
                     outputs=[steps, cfg],
+                    show_progress="hidden",
                 ).then(
                     lambda: gr.update(interactive=True),
                     outputs=model_select,
+                    show_progress="hidden",
+                ).then(
+                    lambda: gr.update(value=t("Model is ready")),
+                    outputs=model_status,
+                    show_progress="hidden",
                 )
 
                 try:
