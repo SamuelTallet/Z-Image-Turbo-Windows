@@ -657,9 +657,11 @@ if __name__ == "__main__":
                     )
 
                 # When a LoRA path is selected:
+                # - lock image model dropdown,
                 # - discard appended timestamp,
                 # - unload any LoRA model,
                 # - load selected LoRA model,
+                # - release image model dropdown,
                 # - shift trigger words history,
                 # - update trigger word in prompt,
                 # - make LoRA row visible,

@@ -97,7 +97,7 @@ class LoraModel:
             if phrase := self.trigger_phrase():
                 return phrase
             else:
-                warning("Trigger phrase not found or empty, trying tag...")
+                warning("LoRA trigger phrase not found or empty, trying tag...")
         except Exception as error:
             warning(error)
 
@@ -111,11 +111,11 @@ class LoraModel:
             return None
 
         if not tag:
-            warning("Tag not found or empty")
+            warning("LoRA tag not found or empty")
             return None
 
         if len(tag) > 32:
-            warning("A long tag (> 32 chars) is unlikely a trigger word")
+            warning("A long LoRA tag (> 32 chars) is unlikely a trigger word")
             return None
 
         return tag
