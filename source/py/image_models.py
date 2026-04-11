@@ -1,8 +1,9 @@
 """Image models management."""
 
-from logging import warning
+from collections.abc import Callable
 from pathlib import Path
 
+import gradio as gr
 from huggingface_hub import snapshot_download
 from pydantic import TypeAdapter
 
@@ -24,14 +25,24 @@ def find_model(model_id: str, models: list[ImageModel]) -> ImageModel:
     return next(m for m in models if m.id == model_id)
 
 
-def download_model(model: ImageModel) -> None:
-    """Download an image model."""
-
+def download_model(model: ImageModel, t: Callable[[str], str]) -> None:
+    """Download an image model.
+    Raises: gr.Error if download definitively fails.
+    """
     try:
         snapshot_download(model.id)
     except Exception:
         if model.backup_id:
-            warning(f"Can't download {model.id}, falling back to {model.backup_id}.")
-            snapshot_download(model.backup_id)
+            gr.Warning(
+                t("Can't download {id}, let's use backup model...").format(id=model.id)
+            )
+            try:
+                snapshot_download(model.backup_id)
+            except Exception:
+                raise gr.Error(
+                    t("Can't download backup model {id}.").format(id=model.backup_id)
+                )
         else:
-            raise
+            raise gr.Error(
+                t("Can't download model {id}, no backup available.").format(id=model.id)
+            )

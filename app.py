@@ -13,7 +13,6 @@ from time import time
 import gradio as gr
 from diffusers import Flux2KleinPipeline, ZImagePipeline
 from PIL import Image
-from PIL.ImageShow import show
 from PIL.PngImagePlugin import PngInfo
 from platformdirs import user_pictures_path
 from sdnq import SDNQConfig  # noqa: F401
@@ -755,7 +754,9 @@ if __name__ == "__main__":
                         show_progress="hidden",
                     )
                     .then(
-                        lambda model_id: download_model(find_model(model_id, models)),
+                        lambda model_id: download_model(
+                            find_model(model_id, models), t
+                        ),
                         inputs=model_select,
                         show_progress="hidden",
                     )
@@ -765,11 +766,10 @@ if __name__ == "__main__":
                 # - reselect initial model,
                 # - release model dropdown.
                 model_download.failure(
-                    lambda: gr.update(value=t("Download failed")),
-                    outputs=model_status,
+                    lambda: gr.Info(f"{t('Fallback to')} {initial_model.name}.")
                 ).then(
                     lambda: gr.update(
-                        value=initial_model.id,
+                        value=initial_model.id,  # This triggers a change.
                         interactive=True,
                     ),
                     outputs=model_select,
