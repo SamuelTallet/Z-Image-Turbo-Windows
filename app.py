@@ -11,6 +11,7 @@ from shutil import rmtree
 from time import time
 
 import gradio as gr
+import torch
 from diffusers import Flux2KleinPipeline, ZImagePipeline
 from PIL import Image
 from PIL.PngImagePlugin import PngInfo
@@ -18,7 +19,6 @@ from platformdirs import user_pictures_path
 from sdnq import SDNQConfig  # noqa: F401
 from sdnq.common import use_torch_compile as triton_is_available
 from sdnq.loader import apply_sdnq_options_to_model
-from torch import bfloat16, cuda, manual_seed, xpu
 
 from source.py.disclaimer import TERMS_OF_USE, TermsOfUse
 from source.py.ex_prompts import get_example_prompts
@@ -171,7 +171,7 @@ def load_model(model: ImageModel) -> ImageModel:
     try:
         pipe = pipe_class.from_pretrained(
             model.id,
-            torch_dtype=bfloat16,
+            torch_dtype=torch.bfloat16,
         )
     except Exception:
         if model.backup_id:
@@ -180,13 +180,13 @@ def load_model(model: ImageModel) -> ImageModel:
             )
             pipe = pipe_class.from_pretrained(
                 model.backup_id,
-                torch_dtype=bfloat16,
+                torch_dtype=torch.bfloat16,
             )
         else:
             raise
 
     # Enable INT8 MatMul for AMD, Intel ARC and Nvidia GPUs:
-    if triton_is_available and (cuda.is_available() or xpu.is_available()):
+    if triton_is_available and (torch.cuda.is_available() or torch.xpu.is_available()):
         pipe.transformer = apply_sdnq_options_to_model(
             pipe.transformer, use_quantized_matmul=True
         )
@@ -294,6 +294,7 @@ def unload_lora():
         pipe_is_busy = False
 
 
+@torch.inference_mode()
 def generate(
     model: ImageModel,
     mm_prompt: dict | None,
@@ -353,7 +354,7 @@ def generate(
         "width": width,
         "num_inference_steps": real_steps,
         "guidance_scale": float(cfg),
-        "generator": manual_seed(used_seed),
+        "generator": torch.manual_seed(used_seed),
     }
 
     if reference_images and reference_images.get("files"):
