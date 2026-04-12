@@ -260,12 +260,16 @@ def swap_lora(path: str, image_model: ImageModel) -> str | None:
             k: v for k, v in bfloat16_lora.items() if not k.endswith(".alpha")
         }
 
-    gr.Info(t("Loading LoRA..."), duration=2)
+    pipe_is_busy = True
 
     try:
-        pipe_is_busy = True
         pipe.unload_lora_weights()
         pipe.load_lora_weights(bfloat16_lora, adapter_name="lora_1")
+    except Exception as error:
+        raise gr.Error(
+            t("Failed to load LoRA, you may need to restart application."),
+            duration=None,
+        ) from error
     finally:
         pipe_is_busy = False
 
@@ -666,14 +670,10 @@ if __name__ == "__main__":
                 # When a LoRA path is selected:
                 # - lock image model dropdown,
                 # - discard appended timestamp,
-                # - unload any LoRA model,
-                # - load selected LoRA model,
-                # - release image model dropdown,
                 # - shift trigger words history,
-                # - update trigger word in prompt,
-                # - make LoRA row visible,
-                # - remember name of loaded LoRA.
-                lora_path.change(
+                # - unload any LoRA model,
+                # - load selected LoRA model.
+                lora_swap = lora_path.change(
                     lambda: gr.update(interactive=False),
                     outputs=model_select,
                 ).then(
@@ -681,7 +681,14 @@ if __name__ == "__main__":
                     inputs=[lora_path, trigger_words, model],
                     outputs=trigger_words,
                     js="(p, tw, m) => [p.split('|')[0], tw, m]",
-                ).then(
+                )
+
+                # On LoRA swap success:
+                # - release image model dropdown,
+                # - update trigger word in prompt,
+                # - make LoRA row visible,
+                # - remember name of loaded LoRA.
+                lora_swap.success(
                     lambda: gr.update(interactive=True),
                     outputs=model_select,
                 ).then(
@@ -694,6 +701,30 @@ if __name__ == "__main__":
                 ).then(
                     lambda p: Path(p).stem,
                     inputs=lora_path,
+                    outputs=lora_name,
+                ).then(
+                    lambda: gr.Info(t("LoRA loaded"), duration=2),
+                )
+
+                # On LoRA swap failure:
+                # - release image model dropdown,
+                # - unload any LoRA model,
+                # - remove trigger word from prompt,
+                # - empty trigger words history,
+                # - make LoRA row invisible,
+                # - forget name of loaded LoRA.
+                lora_swap.failure(
+                    lambda: gr.update(interactive=True),
+                    outputs=model_select,
+                ).then(unload_lora).then(
+                    remove_trigger_word,
+                    inputs=[trigger_words, mm_prompt],
+                    outputs=[trigger_words, mm_prompt],
+                ).then(
+                    lambda: gr.update(visible=False),
+                    outputs=lora_row,
+                ).then(
+                    lambda: None,
                     outputs=lora_name,
                 )
 

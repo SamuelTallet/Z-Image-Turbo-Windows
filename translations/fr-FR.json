@@ -17,6 +17,11 @@
     "Drag an image here to recover its prompt": "Faites glisser une image ici pour retrouver son prompt",
     "Reference Images": "Images de référence",
     "Drag an image here to add it as a reference": "Faites glisser une image ici pour l'ajouter comme référence",
+    "LoRA file extension must be .safetensors": "L'extension du fichier LoRA doit être .safetensors",
+    "This LoRA seems incompatible with": "Ce LoRA semble incompatible avec",
+    "It might not work.": "Il pourrait ne pas fonctionner.",
+    "Failed to load LoRA, you may need to restart application.": "Échec du chargement du LoRA, vous devrez peut-être relancer l'application.",
+    "LoRA loaded": "LoRA chargé",
     "LoRA Strength": "Force du LoRA",
     "Unload LoRA": "Décharger le LoRA",
     "Aspect Ratio": "Format",
@@ -41,10 +46,5 @@
     "Reference images were ignored. Please select another model, such as [klein] 4B, to account them.": "Les images de référence ont été ignorées. Veuillez sélectionner un autre modèle, tel que [klein] 4B, pour les prendre en compte.",
     "Cleared Triton cache as it may be corrupted.": "Le cache de Triton a été vidé car il était peut-être corrompu.",
     "Regenerating same image...": "Re-génération de la même image...",
-    "LoRA file extension must be .safetensors": "L'extension du fichier LoRA doit être .safetensors",
-    "Error": "Erreur",
-    "This LoRA seems incompatible with": "Ce LoRA semble incompatible avec",
-    "It might not work.": "Il pourrait ne pas fonctionner.",
-    "Loading LoRA...": "Chargement du LoRA...",
     "Pipeline is busy. Please try again shortly.": "Le pipeline est occupé. Veuillez réessayer dans un instant."
 }
