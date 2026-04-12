@@ -253,6 +253,13 @@ def swap_lora(path: str, image_model: ImageModel) -> str | None:
         logging.warning(f"Can't check LoRA compatibility: {e}")
 
     bfloat16_lora = lora.to_bf16()
+
+    # Workaround: Diffusers FLUX.2 LoRA converter doesn't handle .alpha keys.
+    if isinstance(pipe, Flux2KleinPipeline):
+        bfloat16_lora = {
+            k: v for k, v in bfloat16_lora.items() if not k.endswith(".alpha")
+        }
+
     gr.Info(t("Loading LoRA..."), duration=2)
 
     try:
@@ -294,7 +301,6 @@ def unload_lora():
         pipe_is_busy = False
 
 
-@torch.inference_mode()
 def generate(
     model: ImageModel,
     mm_prompt: dict | None,
