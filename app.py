@@ -200,6 +200,7 @@ def load_model(model: ImageModel) -> ImageModel:
             pipe.transformer.reset_attention_backend()
             logging.warning(f"FlashAttention is not available: {e}")
 
+    pipe.vae.to(memory_format=torch.channels_last)
     pipe.enable_model_cpu_offload()
 
     return model
