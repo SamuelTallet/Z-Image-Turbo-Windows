@@ -780,6 +780,7 @@ if __name__ == "__main__":
                         remove_trigger_word,
                         inputs=[trigger_words, mm_prompt],
                         outputs=[trigger_words, mm_prompt],
+                        show_progress="hidden",
                     )
                     .then(
                         lambda: gr.update(visible=False),
@@ -799,7 +800,6 @@ if __name__ == "__main__":
                             find_model(model_id, models), t
                         ),
                         inputs=model_select,
-                        show_progress="hidden",
                     )
                 )
 
