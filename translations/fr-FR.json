@@ -6,7 +6,7 @@
     "Keep project developer awake with a coffee": "Maintenez le développeur de ce projet éveillé avec un café",
     "Model": "Modèle",
     "To edit photos, select [klein] 4B": "Pour retoucher des photos, sélectionnez [klein] 4B",
-    "Model is ready": "Le modèle est prêt",
+    "Model loaded": "Modèle chargé",
     "Downloading...": "Téléchargement...",
     "Can't download {id}, let's use backup model...": "Impossible de télécharger {id}, utilisons le modèle de secours...",
     "Can't download backup model {id}.": "Impossible de télécharger le modèle de secours {id}.",

@@ -547,7 +547,7 @@ if __name__ == "__main__":
                             select.title = "{t("To edit photos, select [klein] 4B")}"
                         """,
                     )
-                    model_status = gr.HTML(t("Model is ready"))
+                    model_status = gr.HTML(t("Model loaded"))
 
                 trigger_words = gr.State(value=[None, None])
                 """Trigger words (previous, current)."""
@@ -844,7 +844,7 @@ if __name__ == "__main__":
                     outputs=model_select,
                     show_progress="hidden",
                 ).then(
-                    lambda: gr.update(value=t("Model is ready")),
+                    lambda: gr.update(value=t("Model loaded")),
                     outputs=model_status,
                     show_progress="hidden",
                 )
