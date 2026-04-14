@@ -858,7 +858,7 @@ if __name__ == "__main__":
                     prompts_history = []
 
                 prompts_history_frame = gr.DataFrame(
-                    visible=bool(prompts_history),
+                    visible=True if prompts_history else "hidden",
                     label=t("Previous Prompts"),
                     value=prompts_history,
                     type="array",
