@@ -15,8 +15,6 @@ def extract_prompt_from_image(file_pointer) -> str | None:
     """
     image = Image.open(file_pointer)
 
-    print(image.info)  # DEBUG
-
     if image.info.get("prompt"):
         return image.info["prompt"]
 
