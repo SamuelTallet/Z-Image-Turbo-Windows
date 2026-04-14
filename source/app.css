@@ -105,17 +105,19 @@
 }
 
 #gallery .caption {
-    padding: 0.1em;
-    font-weight: normal;
-    white-space: break-spaces;
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 1;
-    line-clamp: 1;
+    display: none; /* Caption remains visible as tooltip */
 }
 
-#gallery.fullscreen .caption {
-    display: none;
+#gallery .thumbnails {
+    bottom: 3px;
+}
+
+#gallery .thumbnail-item {
+    border: none;
+    box-shadow: unset;
+    transform: unset;
+    width: var(--size-12);
+    height: var(--size-12);
 }
 
 #prompts-history .table-wrap {
