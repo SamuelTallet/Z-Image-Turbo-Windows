@@ -876,12 +876,13 @@ if __name__ == "__main__":
                     number=SEARCHABLE_PROMPTS
                 )
                 gr.HTML(
+                    visible="hidden",
                     js_on_load=f"""
                         let input = document.querySelector("#prompts-history .search-input")
                         input.placeholder = "{t("Search...")}"
                         input.title = "{prompts_history_search_title}"
                         input.spellcheck = false
-                    """
+                    """,
                 )
 
                 examples = gr.Examples(
