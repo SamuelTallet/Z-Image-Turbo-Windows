@@ -109,15 +109,15 @@
 }
 
 #gallery .thumbnails {
-    bottom: 3px;
+    bottom: 1.2vh;
 }
 
 #gallery .thumbnail-item {
     border: none;
     box-shadow: unset;
     transform: unset;
-    width: var(--size-12);
-    height: var(--size-12);
+    width: var(--size-16);
+    height: var(--size-16);
 }
 
 #prompts-history .table-wrap {
