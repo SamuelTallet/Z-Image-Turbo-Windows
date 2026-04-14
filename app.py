@@ -865,17 +865,12 @@ if __name__ == "__main__":
                     interactive=False,
                     max_height=300,
                     show_search="search",
-                    buttons=["fullscreen"],
                     elem_id="prompts-history",
                 )
                 prompts_history_frame.select(
                     on_prompts_history_row_select,
                     outputs=mm_prompt,
                     show_progress="hidden",
-                ).then(
-                    # Force fullscreen exit.
-                    None,
-                    js="() => window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }))",
                 )
                 prompts_history_search_title = t("among last {number} prompts").format(
                     number=SEARCHABLE_PROMPTS
