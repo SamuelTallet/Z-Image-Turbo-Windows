@@ -46,5 +46,6 @@
     "Reference images were ignored. Please select another model, such as [klein] 4B, to account them.": "Les images de référence ont été ignorées. Veuillez sélectionner un autre modèle, tel que [klein] 4B, pour les prendre en compte.",
     "Cleared Triton cache as it may be corrupted.": "Le cache de Triton a été vidé car il était peut-être corrompu.",
     "Regenerating same image...": "Re-génération de la même image...",
+    "Model:": "Modèle :",
     "Pipeline is busy. Please try again shortly.": "Le pipeline est occupé. Veuillez réessayer dans un instant."
 }

@@ -417,8 +417,9 @@ def generate(
     if gallery_images is None:
         gallery_images = []
 
-    # Prompt is added as image caption.
-    gallery_images.append((image_file, prompt))
+    # Model and prompt are added as image caption.
+    caption = f"{t('Model:')} {model.name}\n{t('Prompt:')} {prompt}"
+    gallery_images.append((image_file, caption))
 
     return gallery_images, len(gallery_images) - 1, used_seed
 
