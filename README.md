@@ -1,24 +1,62 @@
 # ZPix
 
-<img src="https://raw.githubusercontent.com/SamuelTallet/ZPix/refs/heads/main/docs/screens/ZPix-v1.0.4.webp">
+<img src="https://raw.githubusercontent.com/SamuelTallet/ZPix/refs/heads/main/docs/screens/ZPix-v1.0.5.webp">
 
-Generate images easily, for free, using solely the power of your GPU.<br>
-Apply LoRAs on the fly. Trigger words are automatically inserted...
+Generate and edit images easily, for free, using solely the power of your GPU. 
+Hotswap LoRAs. Drag reference images directly from output gallery, which is always visible. Everything is made for your comfort. See [all features](#features).
 
 ## Quick start
 
-1. Download and extract [ZPix-v1.0.4.zip](https://github.com/SamuelTallet/ZPix/releases/download/v1.0.4/ZPix-v1.0.4.zip)
+1. Download and extract [ZPix-v1.0.5.zip](https://github.com/SamuelTallet/ZPix/releases/download/v1.0.5/ZPix-v1.0.5.zip)
 2. Run `ZPix.exe`
     - If SmartScreen pops, click on "More info", "Run anyway"
     - If a DLL is missing, install [Visual C++ Redist](https://aka.ms/vc14/vc_redist.x64.exe) and re-run
 3. Write a prompt
 4. Click on "Generate Image"
-5. Download (export) generated image if you want
+5. Images are autosaved in your Pictures \ ZPix
 
 ## Recommended configuration
 
 - GPU: NVIDIA RTX 30/40/50 series with 8GB VRAM or more
 - 32GB RAM (16GB also works but slower)
+
+## Features
+
+### One-click install
+
+- ZPix setups Python environment and packages for you.
+
+### Lazy download
+
+- Models are progressively¹ downloaded from Hugging Face.
+
+### Text-to-Image
+
+- Create image from prompt, classical way.
+
+### Image-to-Image
+
+- Add or drag reference images from output gallery or anywhere.
+- Edit image based on prompt and optional reference images.
+
+### Prompt recall
+
+- Extract prompt from image², dragged from output gallery or anywhere.
+- Search and reuse previous prompts (stored in a local database).
+
+### Custom styles
+
+- Load LoRA safetensors on-the-fly; change LoRA strength.
+- LoRA trigger words are auto-inserted, if found in LoRA metadata.
+
+### Seed control
+
+- Specify a seed value for reproducibility or leave it random.
+
+#### Remarks
+
+1. Initial model at start, then other models when requested.
+2. If image contains prompt in its metadata.
 
 ## Gallery
 
@@ -36,10 +74,15 @@ Please get to [FAQ page](https://github.com/SamuelTallet/ZPix/blob/main/docs/FAQ
 
 ## Credits
 
-Quantized model: [Z-Image-Turbo-SDNQ](https://huggingface.co/Disty0/Z-Image-Turbo-SDNQ-uint4-svd-r32) by Disty0.<br>
-Base model: [Z-Image-Turbo](https://huggingface.co/Tongyi-MAI/Z-Image-Turbo) by Tongyi-MAI.
+Quantized models:
+- [Z-Image-Turbo-SDNQ-uint4-svd-r32](https://huggingface.co/Disty0/Z-Image-Turbo-SDNQ-uint4-svd-r32) by Disty0.
+- [FLUX.2-klein-4B-SDNQ-4bit-dynamic](https://huggingface.co/Disty0/FLUX.2-klein-4B-SDNQ-4bit-dynamic) by Disty0.
 
-Python packages: [Torch](https://pytorch.org/), [Triton Windows](https://pypi.org/project/triton-windows/), [Diffusers](https://pypi.org/project/diffusers/), [PEFT](https://pypi.org/project/peft/), [SDNQ](https://pypi.org/project/sdnq/), [PlatformDirs](https://pypi.org/project/platformdirs/), and [Gradio](https://pypi.org/project/gradio/).<br>
+Base models:
+- [Z-Image-Turbo](https://huggingface.co/Tongyi-MAI/Z-Image-Turbo) by Tongyi-MAI.
+- [FLUX.2-klein-4B](https://huggingface.co/black-forest-labs/FLUX.2-klein-4B) by Black Forest Labs.
+
+Python packages: [Torch](https://pytorch.org/), [Triton Windows](https://pypi.org/project/triton-windows/), [FlashAttention Prebuild Wheels](https://github.com/mjun0812/flash-attention-prebuild-wheels), [Diffusers](https://pypi.org/project/diffusers/), [PEFT](https://pypi.org/project/peft/), [SDNQ](https://pypi.org/project/sdnq/), [PlatformDirs](https://pypi.org/project/platformdirs/), and [Gradio](https://pypi.org/project/gradio/).<br>
 Python tools: [uv](https://github.com/astral-sh/uv), [ty](https://github.com/astral-sh/ty) and [Ruff](https://github.com/astral-sh/ruff) by Astral.
 
 C++ libraries: [WebView2](https://learn.microsoft.com/microsoft-edge/webview2/) by Microsoft.<br>
@@ -49,7 +92,7 @@ Icons: [High voltage](https://github.com/googlefonts/noto-emoji/blob/main/svg/em
 
 ## Thanks
 
-Thanks to M1000 and TGS for beta testing this program.
+Thanks to M1000, TGS and Nomis for beta testing this program.
 
 ## License
 
