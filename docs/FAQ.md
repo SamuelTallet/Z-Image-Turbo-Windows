@@ -4,12 +4,10 @@
 
 Yes, using LoRA models:
 
-1. Search for a LoRA model on [CivitAI](https://civitai.com/search/models?baseModel=ZImageTurbo&baseModel=ZImageBase&modelType=LORA&modelType=Checkpoint) for example.
-Ensure LoRA is compatible with Z-Image Turbo or Z-Image Base.
-2. Download the LoRA.
-3. Back to ZPix, click on "LoRA" button in sidebar.
-4. Select downloaded LoRA file (extension is *.safetensors*).
-5. Generate a new image.
+1. Download a LoRA model from [CivitAI](https://civitai.com/models) for example, or create your own. Ensure this LoRA is based on an image model available in ZPix, for example: `ZImageBase`, `ZImageTurbo`, or `Flux.2 Klein 4B`.
+2. Back to ZPix, click on "LoRA" button in sidebar.
+3. Select LoRA file (extension is *.safetensors*).
+4. Generate a new image.
 
 Note you don't need to restart ZPix to unload or load a new LoRA.
 
@@ -19,7 +17,7 @@ Things you can do:
 
 - Return to LoRA source page, authors often give usage tips (e.g. a lower LoRA strength, a trigger word) and prompts examples.
 - Generate an image with a different seed.
-- Ensure LoRA is compatible with Z-Image Turbo or Z-Image Base.
+- Ensure LoRA is compatible with image model currently loaded.
 
 ## Can I use ZPix for commercial purposes?
 
@@ -28,6 +26,15 @@ Yes, in accordance with [GNU General Public License 3.0](https://www.gnu.org/lic
 ## Does this application works offline?
 
 Once model is downloaded, yes.
+
+## How to erase prompts history?
+
+1. In Windows File Explorer address bar, paste then confirm this path:
+```
+%USERPROFILE%\.zpix
+```
+2. Remove `prompts_history.sqlite` file.
+3. Restart ZPix if it was open.
 
 ## I got an error without details, how to know more?
 
