@@ -32,7 +32,7 @@ Hotswap LoRAs. Drag reference images directly from output gallery, which is alwa
 
 ### Text-to-Image
 
-- Create image from prompt, classical way.
+- Create image from prompt.
 
 ### Image-to-Image
 
@@ -48,6 +48,10 @@ Hotswap LoRAs. Drag reference images directly from output gallery, which is alwa
 
 - Load LoRA safetensors on-the-fly; change LoRA strength.
 - LoRA trigger words are auto-inserted, if found in LoRA metadata.
+
+### Eleven ratios
+
+- 1:1, 16:9, 9:16, 4:3, 3:4, 3:2, 2:3, 16:10, 10:16, 21:9, 9:20
 
 ### Seed control
 
@@ -89,6 +93,8 @@ C++ libraries: [WebView2](https://learn.microsoft.com/microsoft-edge/webview2/) 
 C++ tools: [CMake](https://cmake.org/) by Kitware, and [vcpkg](https://github.com/microsoft/vcpkg) by Microsoft.
 
 Icons: [High voltage](https://github.com/googlefonts/noto-emoji/blob/main/svg/emoji_u26a1.svg) by Google, [Dice](https://www.flaticon.com/free-icon/dice_1714307) by Juicy Fish, and [FAQ](https://www.freepik.com/icon/technology_13631866) by Kerismaker.
+
+Reference image: [A Woman Posing in a Field of Yellow Flowers](https://www.pexels.com/photo/a-woman-posing-in-a-field-of-yellow-flowers-16465981/) by Josh Hild.
 
 ## Thanks
 
